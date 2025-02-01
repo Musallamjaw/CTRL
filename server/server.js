@@ -19,7 +19,7 @@ app.use(cookieParser());
 
 // CORS options - adjust origin for Render or dynamic front-end URL
 const corsOptions = {
-    origin: process.env.FRONTEND_URL || 'http://localhost:5173',  // Replace with your Render frontend URL
+    origin: process.env.FRONTEND_URL,  // Replace with your Render frontend URL
     methods: 'GET,PUT,POST,DELETE',
     credentials: true,
     optionsSuccessStatus: 204
@@ -30,11 +30,10 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
 // Set up the port from environment variables
-const PORT = process.env.PORT || 5501;
+const PORT = process.env.PORT;
 
 // Database connection
 mongoose.connect(process.env.MONGO_URI)
-//mongoose.connect('mongodb+srv://Sweet_Spot:Sweet_Spotqpzm1223@sweet-spot.z8wmo.mongodb.net/?retryWrites=true&w=majority&appName=Sweet-Spot')
     .then(() => {
         app.listen(PORT, () => console.log(`Example app listening on port ${PORT}!`));
         console.log('Connected to database!');

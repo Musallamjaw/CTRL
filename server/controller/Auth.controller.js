@@ -223,7 +223,7 @@ const forgotPassword = async (req, res) => {
         );
 
         // Email content
-        const resetLink = `https://sweet-spot-gamma.vercel.app/logIn/reset-password?token=${resetToken}`;
+        const resetLink = `https://ctrl-chi.vercel.app/logIn/reset-password?token=${resetToken}`;
         const mailOptions = {
             from: process.env.EMAIL,
             to: user.email,
