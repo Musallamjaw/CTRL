@@ -3,7 +3,7 @@ import { store } from '../../app/store';
 //const baseURL = import.meta.env.FRONTEND_BASE_URL
 
 const axiosInstance = axios.create({
-  baseURL: 'https://ctrl-wvsz.onrender.com/api',
+  baseURL: 'https://ctrl-ttvx.onrender.com//api',
   withCredentials: true,
 });
 
