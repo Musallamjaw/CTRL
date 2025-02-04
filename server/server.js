@@ -19,7 +19,7 @@ app.use(cookieParser());
 
 // CORS options - adjust origin for Render or dynamic front-end URL
 const corsOptions = {
-    origin:'https://ctrl-chi.vercel.app/',  // Replace with your Render frontend URL
+    origin: process.env.FRONTEND_URL, // Replace with your Render frontend URL
     methods: 'GET,PUT,POST,DELETE',
     credentials: true,
     optionsSuccessStatus: 204
