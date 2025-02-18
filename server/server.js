@@ -18,12 +18,12 @@ dotenv.config();
 const app = express();
 app.use(cookieParser());
 
-// CORS options - adjust origin for Render or dynamic front-end URL
+
 const corsOptions = {
-    origin: 'http://localhost:5173', // Replace with your frontend URL
-    methods: ['GET', 'POST', 'PUT', 'DELETE'], // Specify allowed methods
-    allowedHeaders: ['Content-Type', 'Authorization'], // Specify allowed headers
-    credentials: true // Allow cookies if needed
+    origin: ['http://localhost:5173', 'https://ctrl-nine.vercel.app'], 
+    methods: ['GET', 'POST', 'PUT', 'DELETE'], 
+    allowedHeaders: ['Content-Type', 'Authorization'], 
+    credentials: true 
 };
 
 app.use(cors(corsOptions));
