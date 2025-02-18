@@ -18,12 +18,12 @@ dotenv.config();
 const app = express();
 app.use(cookieParser());
 
-// CORS options for production
+// CORS options - adjust origin for Render or dynamic front-end URL
 const corsOptions = {
-    origin: 'https://ctrl-nine.vercel.app',
-    methods: ['GET', 'POST', 'PUT', 'DELETE'],
-    allowedHeaders: ['Content-Type', 'Authorization'],
-    credentials: true
+    origin: 'https://ctrl-nine.vercel.app', // Replace with your frontend URL
+    methods: ['GET', 'POST', 'PUT', 'DELETE'], // Specify allowed methods
+    allowedHeaders: ['Content-Type', 'Authorization'], // Specify allowed headers
+    credentials: true // Allow cookies if needed
 };
 
 app.use(cors(corsOptions));
@@ -31,7 +31,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
 // Set up the port from environment variables
-const PORT = process.env.PORT || 10000;
+const PORT = process.env.PORT;
 
 // Database connection
 mongoose.connect(process.env.MONGO_URI)
@@ -50,8 +50,8 @@ app.use('/api/user', userRoutes);
 app.use('/api/tickets', ticketsRoutes);
 app.use('/api/contact', contactRoutes);
 
-// Serve static files from the 'client/dist' directory for production
-if (process.env.NODE_ENV === 'production') {
+// Serve static files from the 'client/dist' directory
+app.use(express.static(path.join(__dirname, '/client/dist')));
 
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
