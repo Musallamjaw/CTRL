@@ -3,7 +3,7 @@ import { store } from '../../app/store';
 //const baseURL = import.meta.env.FRONTEND_BASE_URL
 
 const axiosInstance = axios.create({
-  baseURL: 'https://ctrl-web-l4h2.onrender.com/api',
+  baseURL: 'http://localhost:5501/api',
   withCredentials: true,
 });
 
