@@ -3,7 +3,7 @@ import { store } from '../../app/store';
 //const baseURL = import.meta.env.FRONTEND_BASE_URL
 
 const axiosInstance = axios.create({
-  baseURL: ['http://localhost:5173', 'https://ctrl-nine.vercel.app'],
+  baseURL: 'https://ctrl-web-l4h2.onrender.com',
   withCredentials: true,
 });
 
