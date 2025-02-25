@@ -20,7 +20,7 @@ app.use(cookieParser());
 
 // CORS options - adjust origin for Render or dynamic front-end URL
 const corsOptions = {
-  origin: "https://ctrl-nine.vercel.app",
+  origin: "https://ctrl-club.com",
   methods: ["GET", "POST", "PUT", "DELETE"],
   allowedHeaders: ["Content-Type", "Authorization"],
   credentials: true,

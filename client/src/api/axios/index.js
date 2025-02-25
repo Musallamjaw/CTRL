@@ -3,7 +3,7 @@ import { store } from "../../app/store";
 //const baseURL = import.meta.env.FRONTEND_BASE_URL
 
 const axiosInstance = axios.create({
-  baseURL: "https://ctrl-club.com/api",
+  baseURL: "https://api.ctrl-club.com/api",
   withCredentials: true,
 });
 

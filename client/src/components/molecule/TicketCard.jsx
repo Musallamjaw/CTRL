@@ -17,7 +17,7 @@ function TicketCard({ image, title, date, status, location }) {
   return (
     <div className={` p-3 border bg-slate-200 rounded-xl gap-4 relative`}>
       <img
-        src={`https://ctrl-club.com/uploads/qrcodes/${image}`}
+        src={`https://api.ctrl-club.com/uploads/qrcodes/${image}`}
         alt={title}
         className="object-cover rounded-t-lg w-full xl:min-w-80"
       />

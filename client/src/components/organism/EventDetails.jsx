@@ -43,7 +43,7 @@ const EventDetails = () => {
         <div className="flex flex-col">
           {/* Event Image */}
           <img
-            src={`https://ctrl-club.com/uploads/eventsImage/${event.coverImage}`}
+            src={`https://api.ctrl-club.com/uploads/eventsImage/${event.coverImage}`}
             alt={event.title}
             className="w-full lg:min-w-[600px] max-h-[350px] rounded-lg object-cover object-center"
           />

@@ -44,7 +44,7 @@ function EventCard({
       } p-1 border bg-blue-200 rounded-xl gap-4 2md:max-h-72 relative`}
     >
       <img
-        src={`https://ctrl-club.com/uploads/eventsImage/${image}`}
+        src={`https://api.ctrl-club.com/uploads/eventsImage/${image}`}
         alt={title}
         className="object-cover w-full rounded-t-lg 2md:h-64 min-h-64 2md:w-96 2md:min-w-64 2md:rounded-none 2md:rounded-s-lg"
       />
