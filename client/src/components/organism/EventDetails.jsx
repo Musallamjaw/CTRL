@@ -1,10 +1,10 @@
-import { useState } from 'react';
-import { useLocation } from 'react-router-dom';
-import SpeedDialComponent from './SpeedDialComponent';
-import Footer from './Footer';
-import { createTicket } from '../../api/endpoints/tickets';
-import { toast } from 'react-toastify';
-import { useSelector } from 'react-redux';
+import { useState } from "react";
+import { useLocation } from "react-router-dom";
+import SpeedDialComponent from "./SpeedDialComponent";
+import Footer from "./Footer";
+import { createTicket } from "../../api/endpoints/tickets";
+import { toast } from "react-toastify";
+import { useSelector } from "react-redux";
 
 const EventDetails = () => {
   const location = useLocation();
@@ -15,18 +15,18 @@ const EventDetails = () => {
   const handleParticipate = async () => {
     try {
       const ticketData = {
-        "eventData": {
-          "eventId": event.id,
-          "title": event.title,
-          "location": event.location,
-          "date": event.date
+        eventData: {
+          eventId: event.id,
+          title: event.title,
+          location: event.location,
+          date: event.date,
         },
-        "userData": {
-          "userId": userData.id,
-          "name": userData.name,
-          "email": userData.email
+        userData: {
+          userId: userData.id,
+          name: userData.name,
+          email: userData.email,
         },
-        "numberOfTickets": 1 // Always 1
+        numberOfTickets: 1, // Always 1
       };
 
       const response = await createTicket(ticketData);
@@ -43,7 +43,7 @@ const EventDetails = () => {
         <div className="flex flex-col">
           {/* Event Image */}
           <img
-            src={`http://localhost:5501/uploads/eventsImage/${event.coverImage}`}
+            src={`https://ctrl-club.com/uploads/eventsImage/${event.coverImage}`}
             alt={event.title}
             className="w-full lg:min-w-[600px] max-h-[350px] rounded-lg object-cover object-center"
           />
@@ -54,8 +54,8 @@ const EventDetails = () => {
             <p className="mt-4 text-gray-600">{event.description}</p>
 
             {/* Participate Button */}
-            <button 
-              onClick={handleParticipate} 
+            <button
+              onClick={handleParticipate}
               className="mt-8 text-lg inline-block w-full xmobile:w-2/3 bg-base-color text-white font-semibold py-3 shadow-gray-900 rounded-lg hover:bg-blue-600 text-center hover:shadow-xl transition-all duration-300"
             >
               REGISTER IN THE EVENT
@@ -64,7 +64,7 @@ const EventDetails = () => {
             {/* Category and Availability */}
             <div className="mt-8">
               <p className="text-gray-600">
-                <strong>Available Tickets:</strong> 
+                <strong>Available Tickets:</strong>
                 <span className="px-1 font-semibold ml-2 border rounded shadow-inner shadow-gray-300">
                   {event.availableTickets}
                 </span>

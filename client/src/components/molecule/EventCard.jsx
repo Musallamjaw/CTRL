@@ -44,7 +44,7 @@ function EventCard({
       } p-1 border bg-blue-200 rounded-xl gap-4 2md:max-h-72 relative`}
     >
       <img
-        src={`http://localhost:5501/uploads/eventsImage/${image}`}
+        src={`https://ctrl-club.com/uploads/eventsImage/${image}`}
         alt={title}
         className="object-cover w-full rounded-t-lg 2md:h-64 min-h-64 2md:w-96 2md:min-w-64 2md:rounded-none 2md:rounded-s-lg"
       />
@@ -62,7 +62,6 @@ function EventCard({
           <p className="mb-2 text-sm 2xmobile:text-base font-semibold tracking-tight">
             Location: {location}
           </p>
-
         </div>
         <div className="w-full flex flex-col 2xmobile:flex-row justify-between gap-2 items-center">
           {availableTickets > 0 ? (
@@ -77,7 +76,8 @@ function EventCard({
 
           <p>
             {" "}
-            Available Tickets <span className="font-semibold"> {availableTickets}</span> from{" "}
+            Available Tickets{" "}
+            <span className="font-semibold"> {availableTickets}</span> from{" "}
             <span className="font-semibold"> {capacity}</span>
           </p>
           {homeTickets === "Home" && (
@@ -143,7 +143,9 @@ function EventCard({
       {showConfirm && (
         <div className="absolute inset-0 bg-black bg-opacity-50 flex justify-center items-center">
           <div className="bg-white p-6 rounded-md shadow-lg">
-            <p className="mb-4 text-center">Are you sure you want to delete this event?</p>
+            <p className="mb-4 text-center">
+              Are you sure you want to delete this event?
+            </p>
             <div className="flex justify-around">
               <button
                 onClick={handleConfirmDelete}

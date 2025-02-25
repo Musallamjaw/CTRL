@@ -1,9 +1,9 @@
 import axios from "axios";
-import { store } from '../../app/store';
+import { store } from "../../app/store";
 //const baseURL = import.meta.env.FRONTEND_BASE_URL
 
 const axiosInstance = axios.create({
-  baseURL: 'http://localhost:5501/api',
+  baseURL: "https://ctrl-club.com/api",
   withCredentials: true,
 });
 
@@ -17,10 +17,11 @@ axiosInstance.interceptors.request.use(
     }
 
     return config;
-  }, function (error) {
-
+  },
+  function (error) {
     return Promise.reject(error);
-  });
+  }
+);
 
 // axiosInstance.interceptors.response.use(
 //   (response) => {
@@ -45,4 +46,3 @@ axiosInstance.interceptors.request.use(
 // );
 
 export default axiosInstance;
-
