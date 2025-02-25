@@ -238,7 +238,7 @@ const forgotPassword = async (req, res) => {
     );
 
     // Email content
-    const resetLink = `http://localhost:5173/logIn/reset-password?token=${resetToken}`;
+    const resetLink = `https://www.ctrl-club.com/logIn/reset-password?token=${resetToken}`;
     const mailOptions = {
       from: process.env.EMAIL,
       to: user.email,
