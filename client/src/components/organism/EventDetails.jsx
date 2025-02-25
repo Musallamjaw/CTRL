@@ -30,9 +30,17 @@ const EventDetails = () => {
       };
 
       const response = await createTicket(ticketData);
-      toast.success(response.data.message);
+      if (response.status === 400) {
+        toast.error(response.data.message);
+      } else {
+        toast.success(response.data.message);
+      }
     } catch (error) {
-      toast.error(error);
+      if (error.response && error.response.status === 400) {
+        toast.error(error.response.data.message);
+      } else {
+        toast.error(error.message);
+      }
     }
   };
 
