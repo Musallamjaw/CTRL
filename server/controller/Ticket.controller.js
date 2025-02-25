@@ -111,19 +111,6 @@ exports.createTicket = async (req, res) => {
       return res.status(200).json({ message: "Not enough tickets available" });
     }
 
-    const existingTickets = await Ticket.find({
-      "userData.email": userData.email,
-      "eventData.eventId": eventData.eventId,
-    });
-    if (existingTickets.length > 0) {
-      return res
-        .status(400)
-        .json({ message: "User already registered for this event" });
-    }
-
-    event.availableTickets -= numberOfTickets;
-    await event.save();
-
     const tickets = await Promise.all(
       Array.from({ length: numberOfTickets }).map(async (_, i) => {
         const id = uuidv4();
@@ -140,7 +127,8 @@ exports.createTicket = async (req, res) => {
     );
 
     await sendEmail(userData.email, "Your Event Tickets", tickets);
-
+    event.availableTickets -= numberOfTickets;
+    await event.save();
     res.status(201).json({ message: "Done, Sent Ticket" });
   } catch (err) {
     res.status(500).json({ message: err.message });
