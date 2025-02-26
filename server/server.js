@@ -20,11 +20,7 @@ app.use(cookieParser());
 
 // CORS options - adjust origin for Render or dynamic front-end URL
 const corsOptions = {
-  origin: [
-    "https://ctrl-club.com",
-    "https://www.ctrl-club.com",
-    "http://localhost:5173",
-  ],
+  origin: ["https://ctrl-club.com", "https://www.ctrl-club.com"],
   methods: ["GET", "POST", "PUT", "DELETE"],
   allowedHeaders: ["Content-Type", "Authorization"],
   credentials: true,
