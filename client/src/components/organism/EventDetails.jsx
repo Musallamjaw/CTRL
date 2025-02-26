@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import SpeedDialComponent from "./SpeedDialComponent";
 import Footer from "./Footer";
 import { createTicket, checkTicketStatus } from "../../api/endpoints/tickets";
@@ -8,6 +8,7 @@ import { useSelector } from "react-redux";
 
 const EventDetails = () => {
   const location = useLocation();
+  const navigate = useNavigate();
   const event = location.state?.event || {};
   const userData = useSelector((state) => state.authData.userData);
 
@@ -53,6 +54,9 @@ const EventDetails = () => {
       } else {
         toast.success(response.data.message);
         setIsPurchased(true);
+        setTimeout(() => {
+          navigate("/");
+        }, 3000);
       }
     } catch (error) {
       if (error.response && error.response.status === 400) {
