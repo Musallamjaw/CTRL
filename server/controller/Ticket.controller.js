@@ -111,6 +111,16 @@ exports.createTicket = async (req, res) => {
       return res.status(200).json({ message: "Not enough tickets available" });
     }
 
+    const existingTickets = await Ticket.find({
+      "userData.email": userData.email,
+      "eventData.eventId": eventData.eventId,
+    });
+    if (existingTickets.length > 0) {
+      return res
+        .status(400)
+        .json({ message: "User already registered for this event" });
+    }
+
     event.availableTickets -= numberOfTickets;
     await event.save();
 
