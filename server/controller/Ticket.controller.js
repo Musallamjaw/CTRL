@@ -66,8 +66,8 @@ const sendEmail = async (email, subject, tickets) => {
     <html>
       <body>
         <h1>Your Event Tickets</h1>
-        <a href="https://ameerbadran.github.io/test-deploy/"><h4>Visit Our Website</h4></a>
-        <p>Thank you for your purchase! Here are your tickets:</p>
+        <a href="https://www.ctrl-club.com"><h4>Visit Our Website</h4></a>
+        <p>Thank you for joining us at the event! Here is your ticket:</p>
         ${ticketsHtml}
         <p>Please present these tickets at the event entrance.</p>
       </body>
