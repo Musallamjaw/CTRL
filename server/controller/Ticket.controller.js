@@ -107,20 +107,10 @@ exports.createTicket = async (req, res) => {
       return res.status(404).json({ message: "Event not found" });
     }
 
-    const existingTicket = await Ticket.findOne({
-      "userData.userId": userData.userId,
-      "eventData.eventId": eventData.eventId,
-    });
-
-    if (existingTicket) {
-      return res
-        .status(400)
-        .json({ message: "User already has a ticket for this event" });
-    }
-
     if (event.availableTickets < numberOfTickets) {
       return res.status(200).json({ message: "Not enough tickets available" });
     }
+
     event.availableTickets -= numberOfTickets;
     await event.save();
 
@@ -140,6 +130,7 @@ exports.createTicket = async (req, res) => {
     );
 
     await sendEmail(userData.email, "Your Event Tickets", tickets);
+
     res.status(201).json({ message: "Done, Sent Ticket" });
   } catch (err) {
     res.status(500).json({ message: err.message });
