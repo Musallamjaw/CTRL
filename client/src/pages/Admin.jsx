@@ -1,5 +1,5 @@
 
-import contact from "../../assets/images/8ae7d70e-5729-46e6-9924-2a9bac677e86.jpg"
+import user1 from "../assets/images/user1.jpg"
 import { Link, Outlet, useLocation } from "react-router-dom";
 import { MdEmojiEvents, MdOutlineAddToPhotos } from "react-icons/md";
 import { IoSettingsSharp } from "react-icons/io5";
@@ -19,7 +19,7 @@ export default function Admin() {
             <div className="h-28 bg-base-color bg-opacity-90 rounded-t-md flex justify-center items-end">
             </div>
             <div className="flex flex-col items-center -mt-16 gap-1">
-              <img src={contact} alt="user image" className="size-32 rounded-full border-4 border-white" />
+              <img src={user1} alt="user image" className="size-32 rounded-full border-4 border-white" />
               <h1 className="font-semibold text-xl mt-3">CTRL ADMIN PANAL</h1>
             </div>
           </div>
