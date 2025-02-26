@@ -217,3 +217,23 @@ exports.getTicketsByUserId = async (req, res) => {
     res.status(500).json({ error: "An error occurred while getting tickets" });
   }
 };
+exports.checkUserTicketForEvent = async (req, res) => {
+  try {
+    const { userId, eventId } = req.params;
+
+    const ticket = await Ticket.findOne({
+      "userData.userId": userId,
+      "eventData.eventId": eventId,
+    });
+
+    if (ticket) {
+      res.status(200).json({ isPurchased: true });
+    } else {
+      res.status(200).json({ isPurchased: false });
+    }
+  } catch (error) {
+    res
+      .status(500)
+      .json({ error: "An error occurred while checking the ticket" });
+  }
+};

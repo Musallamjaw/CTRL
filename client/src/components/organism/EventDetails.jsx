@@ -1,18 +1,36 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useLocation } from "react-router-dom";
 import SpeedDialComponent from "./SpeedDialComponent";
 import Footer from "./Footer";
-import { createTicket } from "../../api/endpoints/tickets";
+import { createTicket, checkTicketStatus } from "../../api/endpoints/tickets";
 import { toast } from "react-toastify";
 import { useSelector } from "react-redux";
 
 const EventDetails = () => {
   const location = useLocation();
   const event = location.state?.event || {};
-
   const userData = useSelector((state) => state.authData.userData);
 
+  const [isLoading, setIsLoading] = useState(false);
+  const [isPurchased, setIsPurchased] = useState(false);
+
+  useEffect(() => {
+    const fetchTicketStatus = async () => {
+      try {
+        const response = await checkTicketStatus(userData.id, event.id);
+        setIsPurchased(response.data.isPurchased);
+      } catch (error) {
+        toast.error("Failed to check ticket status");
+      }
+    };
+
+    if (userData.id && event.id) {
+      fetchTicketStatus();
+    }
+  }, [userData.id, event.id]);
+
   const handleParticipate = async () => {
+    setIsLoading(true);
     try {
       const ticketData = {
         eventData: {
@@ -34,6 +52,7 @@ const EventDetails = () => {
         toast.error(response.data.message);
       } else {
         toast.success(response.data.message);
+        setIsPurchased(true);
       }
     } catch (error) {
       if (error.response && error.response.status === 400) {
@@ -41,6 +60,8 @@ const EventDetails = () => {
       } else {
         toast.error(error.message);
       }
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -64,9 +85,16 @@ const EventDetails = () => {
             {/* Participate Button */}
             <button
               onClick={handleParticipate}
-              className="mt-8 text-lg inline-block w-full xmobile:w-2/3 bg-base-color text-white font-semibold py-3 shadow-gray-900 rounded-lg hover:bg-blue-600 text-center hover:shadow-xl transition-all duration-300"
+              className={`mt-8 text-lg inline-block w-full xmobile:w-2/3 bg-base-color text-white font-semibold py-3 shadow-gray-900 rounded-lg hover:bg-blue-600 text-center hover:shadow-xl transition-all duration-300 ${
+                isLoading ? "opacity-50 cursor-not-allowed" : ""
+              }`}
+              disabled={isLoading || isPurchased}
             >
-              REGISTER IN THE EVENT
+              {isLoading
+                ? "LOADING..."
+                : isPurchased
+                ? "ALREADY REGISTERED"
+                : "REGISTER IN THE EVENT"}
             </button>
 
             {/* Category and Availability */}
