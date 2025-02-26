@@ -20,7 +20,7 @@ export default function Admin() {
             </div>
             <div className="flex flex-col items-center -mt-16 gap-1">
               <img src={8ae7d70e-5729-46e6-9924-2a9bac677e86} alt="user image" className="size-32 rounded-full border-4 border-white" />
-              <h1 className="font-semibold text-xl mt-3">CTRL Admin Panal</h1>
+              <h1 className="font-semibold text-xl mt-3">CTRL ADMIN PANAL</h1>
             </div>
           </div>
           <div className="w-full border rounded-md p-4 divide-y divide-gray-300 bg-white">
