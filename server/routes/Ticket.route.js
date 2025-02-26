@@ -15,7 +15,7 @@ router.post("/scan", verifyScannerToken, scanTicket);
 router.get("/count/:filter", verifyToken, getCountTickets);
 router.get("/count/:filter/:userId", verifyToken, getCountUserTickets);
 router.post("/createTicket", verifyToken, createTicket);
-router.post(
+router.get(
   "/checkTicketStatus/:userId/:eventId",
   verifyToken,
   checkUserTicketForEvent
