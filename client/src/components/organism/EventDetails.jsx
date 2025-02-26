@@ -13,7 +13,7 @@ const EventDetails = () => {
   const userData = useSelector((state) => state.authData.userData);
 
   const [isLoading, setIsLoading] = useState(false);
-  const [isPurchased, setIsPurchased] = useState(false);
+  const [isPurchased, setIsPurchased] = useState(true);
 
   useEffect(() => {
     const fetchTicketStatus = async () => {
