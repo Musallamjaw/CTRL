@@ -109,37 +109,26 @@ const AddEvent = () => {
             <div className="text-red-500 text-sm">{formik.errors.title}</div>
           ) : null}
         </div>
+  <div>
+  <input
+    type="datetime-local"
+    name="date"
+    placeholder="Event Date and Time"
+    value={formik.values.date}
+    onChange={(event) => {
+      const localDate = new Date(event.target.value); // Convert input to Date object
+      const utcDate = new Date(localDate.getTime() - localDate.getTimezoneOffset() * 60000); // Convert to UTC
+      formik.setFieldValue("date", utcDate.toISOString().slice(0, 16)); // Store UTC, keep 'YYYY-MM-DDTHH:MM' format
+    }}
+    onBlur={formik.handleBlur}
+    className={`block w-full px-4 py-2 border ${formik.touched.date && formik.errors.date ? 'border-red-500' : 'border-gray-300'
+      } rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500`}
+  />
+  {formik.touched.date && formik.errors.date ? (
+    <div className="text-red-500 text-sm">{formik.errors.date}</div>
+  ) : null}
+</div>
 
-        <div>
-          <input
-            type="text"
-            name="price"
-            placeholder="Event Price"
-            value={formik.values.price}
-            onChange={formik.handleChange}
-            onBlur={formik.handleBlur}
-            className={`block w-full px-4 py-2 border ${formik.touched.price && formik.errors.price ? 'border-red-500' : 'border-gray-300'
-              } rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500`}
-          />
-          {formik.touched.price && formik.errors.price ? (
-            <div className="text-red-500 text-sm">{formik.errors.price}</div>
-          ) : null}
-        </div>
-        <div>
-          <input
-            type="datetime-local"
-            name="date"
-            placeholder="Event Date and Time"
-            value={formik.values.date}
-            onChange={formik.handleChange}
-            onBlur={formik.handleBlur}
-            className={`block w-full px-4 py-2 border ${formik.touched.date && formik.errors.date ? 'border-red-500' : 'border-gray-300'
-              } rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500`}
-          />
-          {formik.touched.date && formik.errors.date ? (
-            <div className="text-red-500 text-sm">{formik.errors.date}</div>
-          ) : null}
-        </div>
 
         <div>
           <textarea
