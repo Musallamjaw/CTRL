@@ -14,6 +14,10 @@ export default function MyTickets() {
   const [pageCount, setPageCount] = useState(1);
   const itemsPerPage = 6;
 
+  const formatDateToUTC = (dateString) => {
+    return new Date(dateString).toISOString(); // Converts to ISO 8601 UTC format
+  };
+  
   useEffect(() => {
     const fetchTicketsCount = async () => {
       try {
