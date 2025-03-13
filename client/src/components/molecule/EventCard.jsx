@@ -57,6 +57,9 @@ function EventCard({
           <p className="mb-3 text-sm 2xmobile:text-base font-normal">
             {description}
           </p>
+           <p className="mb-2 text-sm 2xmobile:text-base font-semibold tracking-tight">
+            Date: {formatDate(date)}
+          </p>
           <p className="mb-2 text-sm 2xmobile:text-base font-semibold tracking-tight">
             Location: {location}
           </p>
