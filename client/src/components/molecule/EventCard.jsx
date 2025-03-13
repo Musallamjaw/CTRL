@@ -7,16 +7,17 @@ import { Link } from "react-router-dom";
 function formatDate(dateString) {
   const date = new Date(dateString);
   const options = {
-    timeZone: 'Asia/Kuwait', // Set timezone to Kuwait
     month: "long",
     day: "numeric",
     year: "numeric",
     hour: "numeric",
     minute: "numeric",
     hour12: true,
+    timeZone: "UTC", // Ensure UTC time is displayed
   };
   return date.toLocaleDateString("en-US", options);
 }
+
 
 function EventCard({
   image,
