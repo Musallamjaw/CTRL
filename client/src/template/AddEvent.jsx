@@ -109,6 +109,23 @@ const AddEvent = () => {
             <div className="text-red-500 text-sm">{formik.errors.title}</div>
           ) : null}
         </div>
+
+        <div>
+          <input
+            type="text"
+            name="price"
+            placeholder="Event Price"
+            value={formik.values.price}
+            onChange={formik.handleChange}
+            onBlur={formik.handleBlur}
+            className={`block w-full px-4 py-2 border ${formik.touched.price && formik.errors.price ? 'border-red-500' : 'border-gray-300'
+              } rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500`}
+          />
+          {formik.touched.price && formik.errors.price ? (
+            <div className="text-red-500 text-sm">{formik.errors.price}</div>
+          ) : null}
+        </div>
+        
   <div>
   <input
     type="datetime-local"
