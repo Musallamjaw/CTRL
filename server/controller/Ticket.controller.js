@@ -48,7 +48,6 @@ const sendEmail = async (email, subject, tickets) => {
     .map(
       (ticket, index) => `
     <div style="border:1px solid #000; color:white; padding:10px; margin-bottom:10px; max-width:300px; border-radius: 1rem; text-align:center; background-color: rgb(20, 16, 44);">
-      <h2>${ticket.eventData.title}</h2>
       <p>Location: ${ticket.eventData.location}</p>
       <img src="cid:image${
         index + 1
