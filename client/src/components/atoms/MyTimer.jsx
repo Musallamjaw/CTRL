@@ -45,7 +45,7 @@ export default function App() {
         }
         // eslint-disable-next-line no-unused-vars
       } catch (error) {
-        setNoEventsMessage('Exciting Events Coming Soon!');
+        setNoEventsMessage('Coming Soon!');
       }
     };
 
