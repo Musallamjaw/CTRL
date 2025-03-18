@@ -17,7 +17,7 @@ AOS.init();
 export default function Home() {
   const authData = useSelector((state) => state.authData);
   const accessToken = authData?.accessToken;
-  const [filter, setFilter] = useState('open');
+  const [filter, setFilter] = useState('all');
   const [eventsData, setEventsData] = useState([]);
   const [eventsCount, setEventsCount] = useState(1);
   const [currentPage, setCurrentPage] = useState(1);
