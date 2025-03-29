@@ -13,7 +13,7 @@ function formatDate(dateString) {
     hour: "numeric",
     minute: "numeric",
     hour12: true,
-    timeZone: "UTC", // Ensure UTC time is displayed
+    timeZone: "UTC",
   };
   return date.toLocaleDateString("en-US", options);
 }
@@ -27,6 +27,7 @@ function EventCard({
   date,
   location,
   meetingLink,
+  eventType = "in-person",
   availableTickets,
   capacity,
   homeTickets,
@@ -59,19 +60,34 @@ function EventCard({
             {description}
           </p>
           
-          {/* Event Type Badge */}
-          <div className="mb-2">
-            <span className={`px-2 py-1 rounded-full text-xs ${
-              eventType === 'online' ? 'bg-blue-500' : 'bg-green-500'
-            } text-white`}>
-              {eventType === 'online' ? 'Online Event' : 'In-Person Event'}
-            </span>
-          </div>
+          {/* Event Type Badge - Only shown for admin */}
+          {homeTickets === "Admin" && (
+            <div className="mb-2">
+              <span className={`px-2 py-1 rounded-full text-xs ${
+                eventType === 'online' ? 'bg-blue-500' : 'bg-green-500'
+              } text-white`}>
+                {eventType === 'online' ? 'Online Event' : 'In-Person Event'}
+              </span>
+            </div>
+          )}
           
           <p className="mb-2 text-sm 2xmobile:text-base font-semibold tracking-tight">
             Date: {formatDate(date)}
           </p>
           
+          {/* Show location for all users */}
+          {eventType === 'in-person' && (
+            <p className="mb-2 text-sm 2xmobile:text-base font-semibold tracking-tight">
+              Location: {location}
+            </p>
+          )}
+          
+          {/* Show meeting link preview for online events */}
+          {eventType === 'online' && meetingLink && (
+            <p className="mb-2 text-sm 2xmobile:text-base font-semibold tracking-tight">
+              Online Meeting: <span className="text-blue-600">[Link Available]</span>
+            </p>
+          )}
         </div>
         
         <div className="w-full flex flex-col 2xmobile:flex-row justify-between gap-2 items-center">
