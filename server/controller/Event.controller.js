@@ -7,23 +7,38 @@ exports.createEvent = async (req, res) => {
       return res.status(400).json({ message: err.message });
     }
     try {
+      const { eventType } = req.body;
+      
+      // Validate required fields based on event type
+      if (eventType === 'in-person' && !req.body.location) {
+        return res.status(400).json({ message: 'Location is required for in-person events' });
+      }
+      
+      if (eventType === 'online' && !req.body.meetingLink) {
+        return res.status(400).json({ message: 'Meeting link is required for online events' });
+      }
+
       const newEvent = new Event({
         title: req.body.title,
         description: req.body.description,
         date: req.body.date,
         location: req.body.location,
+        meetingLink: req.body.meetingLink,
+        eventType: req.body.eventType || 'in-person',
         price: req.body.price,
         capacity: req.body.capacity,
         availableTickets: req.body.capacity,
         coverImage: req.file ? req.file.filename : null,
       });
+
       await newEvent.save();
       res.status(201).json({ message: `Event ${req.body.title} Created Successfully` });
     } catch (error) {
       res.status(500).json({ message: error.message });
     }
   });
-}
+};
+
 exports.getCountEvents = async (req, res) => {
   try {
     const filter = req.params.filter;
@@ -41,7 +56,6 @@ exports.getCountEvents = async (req, res) => {
     res.status(500).json({ error: 'An error occurred while counting events' });
   }
 };
-
 
 exports.getAllEvents = async (req, res) => {
   try {
@@ -86,8 +100,6 @@ exports.getClosestEvent = async (req, res) => {
   }
 };
 
-
-
 exports.getEventById = async (req, res) => {
   try {
     const event = await Event.findById(req.params.id);
@@ -122,18 +134,36 @@ exports.updateEventById = async (req, res) => {
       return res.status(400).json({ message: err.message });
     }
     try {
+      const { eventType } = req.body;
+      
+      // Validate required fields based on event type
+      if (eventType === 'in-person' && !req.body.location) {
+        return res.status(400).json({ message: 'Location is required for in-person events' });
+      }
+      
+      if (eventType === 'online' && !req.body.meetingLink) {
+        return res.status(400).json({ message: 'Meeting link is required for online events' });
+      }
+
+      const updateData = {
+        title: req.body.title,
+        description: req.body.description,
+        date: req.body.date,
+        location: req.body.location,
+        meetingLink: req.body.meetingLink,
+        eventType: req.body.eventType || 'in-person',
+        price: req.body.price,
+        capacity: req.body.capacity,
+        availableTickets: req.body.availableTickets,
+      };
+
+      if (req.file) {
+        updateData.coverImage = req.file.filename;
+      }
+
       const updatedEvent = await Event.findByIdAndUpdate(
         req.params.id,
-        {
-          title: req.body.title,
-          description: req.body.description,
-          date: req.body.date,
-          location: req.body.location,
-          price: req.body.price,
-          capacity: req.body.capacity,
-          availableTickets: req.body.availableTickets,
-          coverImage: req.file ? req.file.filename : null,
-        },
+        updateData,
         { new: true }
       );
 
@@ -141,7 +171,10 @@ exports.updateEventById = async (req, res) => {
         return res.status(404).json({ message: 'Event not found' });
       }
 
-      res.status(200).json({ message: `Event ${updatedEvent.title} updated successfully`, updatedEvent });
+      res.status(200).json({ 
+        message: `Event ${updatedEvent.title} updated successfully`, 
+        updatedEvent 
+      });
     } catch (error) {
       res.status(500).json({ message: error.message });
     }
@@ -156,11 +189,12 @@ exports.getAllEventsForScanner = async (req, res) => {
 
     let query = { date: { $gte: yesterday } };
 
-    const events = await Event.find(query).sort({ date: 1 }).select('_id title');
+    const events = await Event.find(query)
+      .sort({ date: 1 })
+      .select('_id title eventType');
 
     res.status(200).json(events);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
 };
-
