@@ -1,23 +1,23 @@
-import AOS from 'aos';
-import 'aos/dist/aos.css';
+import AOS from "aos";
+import "aos/dist/aos.css";
 import MyTimer from "../components/atoms/MyTimer";
 import Navbar from "../components/organism/Navbar";
 import ContactForm from "../components/organism/ContactSection";
 import AboutUs from "../components/organism/AboutUs";
 import ButtonComponent from "../components/atoms/ButtonComponent";
 import EventCard from "../components/molecule/EventCard";
-import { useSelector } from 'react-redux';
-import PaginationRounded from '../components/molecule/PaginationRounded';
-import { getAllEvents, getCountEvents } from '../api/endpoints/events';
-import { useEffect, useState } from 'react';
-import bg_image from "../assets/images/6a60863f-851e-4026-a8a5-218b429fe327.jpg"
-import { toast } from 'react-toastify';
+import { useSelector } from "react-redux";
+import PaginationRounded from "../components/molecule/PaginationRounded";
+import { getAllEvents, getCountEvents } from "../api/endpoints/events";
+import { useEffect, useState } from "react";
+import bg_image from "../assets/images/6a60863f-851e-4026-a8a5-218b429fe327.jpg";
+import { toast } from "react-toastify";
 AOS.init();
 
 export default function Home() {
   const authData = useSelector((state) => state.authData);
   const accessToken = authData?.accessToken;
-  const [filter, setFilter] = useState('all');
+  const [filter, setFilter] = useState("all");
   const [eventsData, setEventsData] = useState([]);
   const [eventsCount, setEventsCount] = useState(1);
   const [currentPage, setCurrentPage] = useState(1);
@@ -29,7 +29,7 @@ export default function Home() {
       try {
         const eventsRes = await getCountEvents(filter);
         setEventsCount(eventsRes?.data?.count || 0);
-        setPageCount(Math.ceil(eventsCount / itemsPerPage))
+        setPageCount(Math.ceil(eventsCount / itemsPerPage));
       } catch (error) {
         alert.error("Error fetching events count:", error);
       }
@@ -53,7 +53,8 @@ export default function Home() {
   const allEventsData = async (page, filter) => {
     try {
       const response = await getAllEvents(page, filter);
-      setEventsData(response?.data || []);
+      console.log(" response", response);
+      setEventsData(response?.data?.data || []);
     } catch (error) {
       toast.error("Error fetching events data:", error);
     }
@@ -70,49 +71,72 @@ export default function Home() {
   return (
     <div>
       <Navbar />
-      <section id="home" className="relative bg-ticket-bg bg-no-repeat bg-cover bg-center w-full h-[90vh] flex items-center">
-  {/* Background Overlay */}
-  <div className="absolute w-full h-full bg-blue-600 bg-opacity-30"></div>
+      <section
+        id="home"
+        className="relative bg-ticket-bg bg-no-repeat bg-cover bg-center w-full h-[90vh] flex items-center"
+      >
+        {/* Background Overlay */}
+        <div className="absolute w-full h-full bg-blue-600 bg-opacity-30"></div>
 
-  {/* Content */}
-  <div className="relative z-10 text-white flex flex-col justify-center items-center w-full h-full text-center">
-    <h1 className="text-2xl md:text-6xl font-black">
-      Welcome to <span className="text-base-color">CTRL CLUB</span>
-    </h1>
-    <h2 className="text-xl md:text-4xl font-black mt-6">
-      Discover Our Next Big Event
-    </h2>
+        {/* Content */}
+        <div className="relative z-10 text-white flex flex-col justify-center items-center w-full h-full text-center">
+          <h1 className="text-2xl md:text-6xl font-black">
+            Welcome to <span className="text-base-color">CTRL CLUB</span>
+          </h1>
+          <h2 className="text-xl md:text-4xl font-black mt-6">
+            Discover Our Next Big Event
+          </h2>
 
-    {/* Countdown Timer (Bigger & Lower) */}
-    <div className="mt-16 text-4xl md:text-6xl">
-      <MyTimer />
-    </div>
+          {/* Countdown Timer (Bigger & Lower) */}
+          <div className="mt-16 text-4xl md:text-6xl">
+            <MyTimer />
+          </div>
 
-    {/* Buttons */}
-    {!accessToken ? (
-      <div className="flex flex-col md:flex-row gap-6 mt-16">
-        <ButtonComponent text={'Log In'} path={"/logIn"} className="text-lg px-6 py-3" />
-        <ButtonComponent text={'Sign Up'} path={"/signUp"} className="text-lg px-6 py-3" />
-      </div>
-    ) : (
-      <div className="flex flex-col md:flex-row gap-6 mt-16">
-        <ButtonComponent text={'My Tickets'} path={"/myTickets"} className="text-lg px-6 py-3" />
-      </div>
-    )}
-  </div>
-</section>
+          {/* Buttons */}
+          {!accessToken ? (
+            <div className="flex flex-col md:flex-row gap-6 mt-16">
+              <ButtonComponent
+                text={"Log In"}
+                path={"/logIn"}
+                className="text-lg px-6 py-3"
+              />
+              <ButtonComponent
+                text={"Sign Up"}
+                path={"/signUp"}
+                className="text-lg px-6 py-3"
+              />
+            </div>
+          ) : (
+            <div className="flex flex-col md:flex-row gap-6 mt-16">
+              <ButtonComponent
+                text={"My Tickets"}
+                path={"/myTickets"}
+                className="text-lg px-6 py-3"
+              />
+            </div>
+          )}
+        </div>
+      </section>
 
       <AboutUs />
 
-      <section id="events" className="relative bg-ticket-bg bg-no-repeat bg-cover bg-center w-full">
-        <div className='absolute w-full h-full bg-blue-600 bg-opacity-40'></div>
+      <section
+        id="events"
+        className="relative bg-ticket-bg bg-no-repeat bg-cover bg-center w-full"
+      >
+        <div className="absolute w-full h-full bg-blue-600 bg-opacity-40"></div>
         <div className="max-w-[1300px] mx-auto flex flex-col justify-center items-center">
           <div className="z-10 mt-10 px-4 2xmobile:px-10">
             <div className="border-t-2 border-base-color border-opacity-60 w-44 my-10"></div>
-            <h1 className="text-xl xmobile:text-2xl 2xmobile:text-4xl 2md:text-5xl text-gray-800 font-black z-10 text-center">Browse Through Our <span className="text-base-color">Events</span> Here.</h1>
+            <h1 className="text-xl xmobile:text-2xl 2xmobile:text-4xl 2md:text-5xl text-gray-800 font-black z-10 text-center">
+              Browse Through Our <span className="text-base-color">Events</span>{" "}
+              Here.
+            </h1>
           </div>
           <div className="z-10 mt-10">
-            <label htmlFor="eventFilter" className="mr-2 text-white">Filter Events: </label>
+            <label htmlFor="eventFilter" className="mr-2 text-white">
+              Filter Events:{" "}
+            </label>
             <select
               id="eventFilter"
               value={filter}
@@ -125,34 +149,42 @@ export default function Home() {
             </select>
           </div>
           <div className="mt-20 grid z-10 px-4 2xmobile:px-10 mb-20 gap-5">
-            {eventsData.map(event => (
-              <EventCard
-                key={event._id}
-                id={event._id}
-                image={event.coverImage}
-                title={event.title}
-                description={event.description}
-                date={event.date}
-                location={event.location}
-                price={event.price}
-                capacity={event.capacity}
-                availableTickets={event.availableTickets}
-                homeTickets={'Home'}
-              />
-            ))}
-            {eventsData.length > 0 &&
-              <div className="mx-auto mt-20">
-                <PaginationRounded count={pageCount} page={currentPage} onChange={handlePagination} />
+            {eventsData.length > 0 ? (
+              eventsData.map((event) => (
+                <EventCard
+                  key={event._id}
+                  id={event._id}
+                  image={event.coverImage}
+                  title={event.title}
+                  description={event.description}
+                  date={event.date}
+                  location={event.location}
+                  price={event.price}
+                  capacity={event.capacity}
+                  availableTickets={event.availableTickets}
+                  homeTickets={"Home"}
+                />
+              ))
+            ) : (
+              <div className="text-white text-center mt-10">
+                No events found. Please try a different filter.
               </div>
-            }
-
+            )}
+            {eventsData.length > 0 && (
+              <div className="mx-auto mt-20">
+                <PaginationRounded
+                  count={pageCount}
+                  page={currentPage}
+                  onChange={handlePagination}
+                />
+              </div>
+            )}
           </div>
         </div>
       </section>
       <div className="second-section flex max-w-[1300px] mx-auto pt-14 pb-28 gap-6 p-4 overflow-hidden">
         <ContactForm />
       </div>
-
     </div>
   );
 }
