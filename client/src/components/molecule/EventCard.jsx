@@ -27,7 +27,6 @@ function EventCard({
   date,
   location,
   meetingLink,
-  eventType = "in-person", // Default to in-person for backward compatibility
   availableTickets,
   capacity,
   homeTickets,
@@ -73,19 +72,6 @@ function EventCard({
             Date: {formatDate(date)}
           </p>
           
-          {/* Show location for in-person events */}
-          {eventType === 'in-person' && (
-            <p className="mb-2 text-sm 2xmobile:text-base font-semibold tracking-tight">
-              Location: {location}
-            </p>
-          )}
-          
-          {/* Show meeting link preview for online events */}
-          {eventType === 'online' && meetingLink && (
-            <p className="mb-2 text-sm 2xmobile:text-base font-semibold tracking-tight">
-              Online Meeting: <span className="text-blue-600">[Link Available]</span>
-            </p>
-          )}
         </div>
         
         <div className="w-full flex flex-col 2xmobile:flex-row justify-between gap-2 items-center">
