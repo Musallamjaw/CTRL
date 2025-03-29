@@ -18,7 +18,6 @@ function formatDate(dateString) {
   return date.toLocaleDateString("en-US", options);
 }
 
-
 function EventCard({
   image,
   id,
@@ -27,6 +26,8 @@ function EventCard({
   price,
   date,
   location,
+  meetingLink,
+  eventType = "in-person", // Default to in-person for backward compatibility
   availableTickets,
   capacity,
   homeTickets,
@@ -36,7 +37,7 @@ function EventCard({
 
   const handleConfirmDelete = () => {
     handleDelete();
-    setShowConfirm(false); // إغلاق النافذة المنبثقة بعد الحذف
+    setShowConfirm(false);
   };
 
   return (
@@ -58,14 +59,37 @@ function EventCard({
           <p className="mb-3 text-sm 2xmobile:text-base font-normal">
             {description}
           </p>
-           <p className="mb-2 text-sm 2xmobile:text-base font-semibold tracking-tight">
+          
+          {/* Event Type Badge */}
+          <div className="mb-2">
+            <span className={`px-2 py-1 rounded-full text-xs ${
+              eventType === 'online' ? 'bg-blue-500' : 'bg-green-500'
+            } text-white`}>
+              {eventType === 'online' ? 'Online Event' : 'In-Person Event'}
+            </span>
+          </div>
+          
+          <p className="mb-2 text-sm 2xmobile:text-base font-semibold tracking-tight">
             Date: {formatDate(date)}
           </p>
-          <p className="mb-2 text-sm 2xmobile:text-base font-semibold tracking-tight">
-            Location: {location}
-          </p>
+          
+          {/* Show location for in-person events */}
+          {eventType === 'in-person' && (
+            <p className="mb-2 text-sm 2xmobile:text-base font-semibold tracking-tight">
+              Location: {location}
+            </p>
+          )}
+          
+          {/* Show meeting link preview for online events */}
+          {eventType === 'online' && meetingLink && (
+            <p className="mb-2 text-sm 2xmobile:text-base font-semibold tracking-tight">
+              Online Meeting: <span className="text-blue-600">[Link Available]</span>
+            </p>
+          )}
         </div>
+        
         <div className="w-full flex flex-col 2xmobile:flex-row justify-between gap-2 items-center">
+          {/* Event status (open/closed) */}
           {availableTickets > 0 ? (
             <span className="py-1 px-3 border rounded-full text-sm bg-green-500 text-white">
               open
@@ -76,12 +100,14 @@ function EventCard({
             </span>
           )}
 
+          {/* Tickets availability */}
           <p>
-            {" "}
             Available Tickets{" "}
             <span className="font-semibold"> {availableTickets}</span> from{" "}
             <span className="font-semibold"> {capacity}</span>
           </p>
+          
+          {/* Join/View button */}
           {homeTickets === "Home" && (
             <Link
               to="eventDetails"
@@ -92,18 +118,26 @@ function EventCard({
                   date: date,
                   description: description,
                   location: location,
+                  meetingLink: meetingLink,
+                  eventType: eventType,
                   capacity: capacity,
                   availableTickets: availableTickets,
                   coverImage: image,
                 },
               }}
-              className="px-4 py-2 font-semibold border border-slate-700 rounded-full hover:text-white hover:bg-base-color transition-all duration-300"
+              className={`px-4 py-2 font-semibold border border-slate-700 rounded-full hover:text-white ${
+                eventType === 'online' 
+                  ? 'hover:bg-blue-600' 
+                  : 'hover:bg-base-color'
+              } transition-all duration-300`}
             >
-              Join Event
+              {eventType === 'online' ? 'Join Online' : 'Join Event'}
             </Link>
           )}
         </div>
       </div>
+      
+      {/* QR Code for User Tickets view */}
       {homeTickets === "User" && (
         <img
           src={qrimage}
@@ -112,6 +146,7 @@ function EventCard({
         />
       )}
 
+      {/* Admin controls (Edit/Delete) */}
       {homeTickets === "Admin" && (
         <div className="absolute left-3 top-3 flex gap-4 bg-gray-200 p-2 rounded-md bg-opacity-90">
           <Link
@@ -123,6 +158,8 @@ function EventCard({
                 date: date,
                 description: description,
                 location: location,
+                meetingLink: meetingLink,
+                eventType: eventType,
                 capacity: capacity,
                 availableTickets: availableTickets,
                 coverImage: image,
@@ -142,6 +179,7 @@ function EventCard({
         </div>
       )}
 
+      {/* Delete confirmation modal */}
       {showConfirm && (
         <div className="absolute inset-0 bg-black bg-opacity-50 flex justify-center items-center">
           <div className="bg-white p-6 rounded-md shadow-lg">
