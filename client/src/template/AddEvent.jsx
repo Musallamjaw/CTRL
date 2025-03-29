@@ -4,23 +4,37 @@ import * as Yup from 'yup';
 import { IoMdCloudUpload } from 'react-icons/io';
 import { createEvent } from '../api/endpoints/events';
 import { toast } from 'react-toastify';
+import { useNavigate } from 'react-router-dom';
 
 const AddEvent = () => {
   const [coverImagePreview, setCoverImagePreview] = useState('');
-  const [eventType, setEventType] = useState('in-person'); // Default to in-person
+  const [eventType, setEventType] = useState('in-person');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const navigate = useNavigate();
 
-  const callAddEvent = async (eventData) => {
-    try {
-      const response = await createEvent(eventData);
-      toast.success('Your data has been inserted successfully.');
-      return response;
-    } catch (error) {
-      toast.error(error?.response?.data?.message || 'Add Event failed. Please try again.');
-      return { error: "Add Event failed. Please try again." };
+  const handleCoverImageChange = (event) => {
+    const file = event.target.files[0];
+    if (file) {
+      formik.setFieldValue('coverImage', file);
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setCoverImagePreview(reader.result);
+      };
+      reader.readAsDataURL(file);
     }
-  }
+  };
 
-  // Formik with Yup validation
+  const handleEventTypeChange = (e) => {
+    const type = e.target.value;
+    setEventType(type);
+    formik.setFieldValue('eventType', type);
+    if (type === 'online') {
+      formik.setFieldValue('location', '');
+    } else {
+      formik.setFieldValue('meetingLink', '');
+    }
+  };
+
   const formik = useFormik({
     initialValues: {
       coverImage: null,
@@ -34,8 +48,8 @@ const AddEvent = () => {
       eventType: 'in-person',
     },
     validationSchema: Yup.object({
-      coverImage: Yup.mixed().required('Course cover image is required'),
-      title: Yup.string().required('Course title is required'),
+      coverImage: Yup.mixed().required('Event cover image is required'),
+      title: Yup.string().required('Event title is required'),
       price: Yup.number().required('Price is required').typeError('Price must be a number'),
       date: Yup.date().required('Date is required').typeError('Date must be a valid date'),
       description: Yup.string().required('Description is required'),
@@ -50,43 +64,50 @@ const AddEvent = () => {
       capacity: Yup.number().required('Capacity is required').typeError('Capacity must be a number'),
       eventType: Yup.string().required('Event type is required'),
     }),
-    onSubmit: async (values, { setSubmitting, resetForm }) => {
-      await callAddEvent(values);
-      resetForm();
-      setSubmitting(false);
+    onSubmit: async (values, { resetForm }) => {
+      setIsSubmitting(true);
+      try {
+        const formData = new FormData();
+        formData.append('title', values.title);
+        formData.append('description', values.description);
+        formData.append('date', values.date);
+        formData.append('price', values.price);
+        formData.append('capacity', values.capacity);
+        formData.append('eventType', values.eventType);
+        
+        if (values.eventType === 'in-person') {
+          formData.append('location', values.location);
+        } else {
+          formData.append('meetingLink', values.meetingLink);
+        }
+        
+        if (values.coverImage) {
+          formData.append('coverImage', values.coverImage);
+        }
+
+        const response = await createEvent(formData);
+        
+        if (response.error) {
+          toast.error(response.error);
+        } else {
+          toast.success('Event created successfully!');
+          resetForm();
+          setCoverImagePreview('');
+          navigate('/admin/events'); // Redirect to events list
+        }
+      } catch (error) {
+        console.error('Submission error:', error);
+        toast.error(error.response?.data?.message || 'Failed to create event');
+      } finally {
+        setIsSubmitting(false);
+      }
     },
   });
-
-  const handleCoverImageChange = (event) => {
-    const file = event.target.files[0];
-    if (file) {
-      formik.setFieldValue('coverImage', file);
-
-      // Update the cover image preview
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setCoverImagePreview(reader.result);
-      };
-      reader.readAsDataURL(file);
-    }
-  };
-
-  const handleEventTypeChange = (e) => {
-    const type = e.target.value;
-    setEventType(type);
-    formik.setFieldValue('eventType', type);
-    // Clear the other field when switching types
-    if (type === 'online') {
-      formik.setFieldValue('location', '');
-    } else {
-      formik.setFieldValue('meetingLink', '');
-    }
-  };
 
   return (
     <div className="lg:col-span-3 w-full mx-auto p-6 bg-white rounded-lg lg:ml-6 border">
       <form onSubmit={formik.handleSubmit} className="w-full flex flex-col gap-4 mx-auto">
-        {/* Existing cover image section remains the same */}
+        {/* Cover Image Upload */}
         <div className="mb-4 border-b pb-4">
           <label className="block text-gray-700">Event Cover Image</label>
           <div className="flex items-center space-x-4">
@@ -115,7 +136,6 @@ const AddEvent = () => {
           {formik.touched.coverImage && formik.errors.coverImage ? (
             <div className="text-red-500 text-sm">{formik.errors.coverImage}</div>
           ) : null}
-          <p className="text-gray-500 mt-2">PNG or JPG no bigger than 800px width and height</p>
         </div>
 
         {/* Event Type Selector */}
@@ -125,14 +145,17 @@ const AddEvent = () => {
             name="eventType"
             value={formik.values.eventType}
             onChange={handleEventTypeChange}
-            className="block w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            onBlur={formik.handleBlur}
+            className={`block w-full px-4 py-2 border ${
+              formik.touched.eventType && formik.errors.eventType ? 'border-red-500' : 'border-gray-300'
+            } rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500`}
           >
             <option value="in-person">In-Person Event</option>
             <option value="online">Online Event</option>
           </select>
         </div>
 
-        {/* Existing title, price, date, description fields remain the same */}
+        {/* Title */}
         <div>
           <input
             type="text"
@@ -141,47 +164,51 @@ const AddEvent = () => {
             value={formik.values.title}
             onChange={formik.handleChange}
             onBlur={formik.handleBlur}
-            className={`block w-full px-4 py-2 border ${formik.touched.title && formik.errors.title ? 'border-red-500' : 'border-gray-300'} rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500`}
+            className={`block w-full px-4 py-2 border ${
+              formik.touched.title && formik.errors.title ? 'border-red-500' : 'border-gray-300'
+            } rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500`}
           />
-          {formik.touched.title && formik.errors.title ? (
+          {formik.touched.title && formik.errors.title && (
             <div className="text-red-500 text-sm">{formik.errors.title}</div>
-          ) : null}
+          )}
         </div>
 
+        {/* Price */}
         <div>
           <input
-            type="text"
+            type="number"
             name="price"
             placeholder="Event Price"
             value={formik.values.price}
             onChange={formik.handleChange}
             onBlur={formik.handleBlur}
-            className={`block w-full px-4 py-2 border ${formik.touched.price && formik.errors.price ? 'border-red-500' : 'border-gray-300'} rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500`}
+            className={`block w-full px-4 py-2 border ${
+              formik.touched.price && formik.errors.price ? 'border-red-500' : 'border-gray-300'
+            } rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500`}
           />
-          {formik.touched.price && formik.errors.price ? (
+          {formik.touched.price && formik.errors.price && (
             <div className="text-red-500 text-sm">{formik.errors.price}</div>
-          ) : null}
+          )}
         </div>
 
+        {/* Date */}
         <div>
           <input
             type="datetime-local"
             name="date"
-            placeholder="Event Date and Time"
             value={formik.values.date}
-            onChange={(event) => {
-              const localDate = new Date(event.target.value);
-              const utcDate = new Date(localDate.getTime() - localDate.getTimezoneOffset() * 60000);
-              formik.setFieldValue("date", utcDate.toISOString().slice(0, 16));
-            }}
+            onChange={formik.handleChange}
             onBlur={formik.handleBlur}
-            className={`block w-full px-4 py-2 border ${formik.touched.date && formik.errors.date ? 'border-red-500' : 'border-gray-300'} rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500`}
+            className={`block w-full px-4 py-2 border ${
+              formik.touched.date && formik.errors.date ? 'border-red-500' : 'border-gray-300'
+            } rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500`}
           />
-          {formik.touched.date && formik.errors.date ? (
+          {formik.touched.date && formik.errors.date && (
             <div className="text-red-500 text-sm">{formik.errors.date}</div>
-          ) : null}
+          )}
         </div>
 
+        {/* Description */}
         <div>
           <textarea
             name="description"
@@ -189,17 +216,19 @@ const AddEvent = () => {
             value={formik.values.description}
             onChange={formik.handleChange}
             onBlur={formik.handleBlur}
-            className={`block w-full px-4 py-2 border ${formik.touched.description && formik.errors.description
-              ? 'border-red-500'
-              : 'border-gray-300'
-              } rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500`}
+            className={`block w-full px-4 py-2 border ${
+              formik.touched.description && formik.errors.description
+                ? 'border-red-500'
+                : 'border-gray-300'
+            } rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500`}
+            rows="4"
           />
-          {formik.touched.description && formik.errors.description ? (
+          {formik.touched.description && formik.errors.description && (
             <div className="text-red-500 text-sm">{formik.errors.description}</div>
-          ) : null}
+          )}
         </div>
 
-        {/* Conditional fields based on event type */}
+        {/* Conditional Fields */}
         {eventType === 'in-person' ? (
           <div>
             <input
@@ -209,11 +238,13 @@ const AddEvent = () => {
               value={formik.values.location}
               onChange={formik.handleChange}
               onBlur={formik.handleBlur}
-              className={`block w-full px-4 py-2 border ${formik.touched.location && formik.errors.location ? 'border-red-500' : 'border-gray-300'} rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500`}
+              className={`block w-full px-4 py-2 border ${
+                formik.touched.location && formik.errors.location ? 'border-red-500' : 'border-gray-300'
+              } rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500`}
             />
-            {formik.touched.location && formik.errors.location ? (
+            {formik.touched.location && formik.errors.location && (
               <div className="text-red-500 text-sm">{formik.errors.location}</div>
-            ) : null}
+            )}
           </div>
         ) : (
           <div>
@@ -224,14 +255,17 @@ const AddEvent = () => {
               value={formik.values.meetingLink}
               onChange={formik.handleChange}
               onBlur={formik.handleBlur}
-              className={`block w-full px-4 py-2 border ${formik.touched.meetingLink && formik.errors.meetingLink ? 'border-red-500' : 'border-gray-300'} rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500`}
+              className={`block w-full px-4 py-2 border ${
+                formik.touched.meetingLink && formik.errors.meetingLink ? 'border-red-500' : 'border-gray-300'
+              } rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500`}
             />
-            {formik.touched.meetingLink && formik.errors.meetingLink ? (
+            {formik.touched.meetingLink && formik.errors.meetingLink && (
               <div className="text-red-500 text-sm">{formik.errors.meetingLink}</div>
-            ) : null}
+            )}
           </div>
         )}
 
+        {/* Capacity */}
         <div>
           <input
             type="number"
@@ -240,15 +274,24 @@ const AddEvent = () => {
             value={formik.values.capacity}
             onChange={formik.handleChange}
             onBlur={formik.handleBlur}
-            className={`block w-full px-4 py-2 border ${formik.touched.capacity && formik.errors.capacity ? 'border-red-500' : 'border-gray-300'} rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500`}
+            className={`block w-full px-4 py-2 border ${
+              formik.touched.capacity && formik.errors.capacity ? 'border-red-500' : 'border-gray-300'
+            } rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500`}
           />
-          {formik.touched.capacity && formik.errors.capacity ? (
+          {formik.touched.capacity && formik.errors.capacity && (
             <div className="text-red-500 text-sm">{formik.errors.capacity}</div>
-          ) : null}
+          )}
         </div>
 
-        <button type="submit" className="px-4 py-2 bg-base-color text-white rounded-md hover:bg-green-700">
-          Submit
+        {/* Submit Button */}
+        <button
+          type="submit"
+          disabled={isSubmitting}
+          className={`px-4 py-2 bg-base-color text-white rounded-md hover:bg-green-700 ${
+            isSubmitting ? 'opacity-50 cursor-not-allowed' : ''
+          }`}
+        >
+          {isSubmitting ? 'Creating Event...' : 'Create Event'}
         </button>
       </form>
     </div>
