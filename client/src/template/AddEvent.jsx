@@ -7,6 +7,7 @@ import { toast } from 'react-toastify';
 
 const AddEvent = () => {
   const [coverImagePreview, setCoverImagePreview] = useState('');
+  const [eventType, setEventType] = useState('in-person'); // Default to in-person
 
   const callAddEvent = async (eventData) => {
     try {
@@ -28,7 +29,9 @@ const AddEvent = () => {
       date: '',
       description: '',
       location: '',
+      meetingLink: '',
       capacity: '',
+      eventType: 'in-person',
     },
     validationSchema: Yup.object({
       coverImage: Yup.mixed().required('Course cover image is required'),
@@ -36,8 +39,16 @@ const AddEvent = () => {
       price: Yup.number().required('Price is required').typeError('Price must be a number'),
       date: Yup.date().required('Date is required').typeError('Date must be a valid date'),
       description: Yup.string().required('Description is required'),
-      location: Yup.string().required('Location is required'),
+      location: Yup.string().when('eventType', {
+        is: 'in-person',
+        then: Yup.string().required('Location is required for in-person events'),
+      }),
+      meetingLink: Yup.string().when('eventType', {
+        is: 'online',
+        then: Yup.string().url('Must be a valid URL').required('Meeting link is required for online events'),
+      }),
       capacity: Yup.number().required('Capacity is required').typeError('Capacity must be a number'),
+      eventType: Yup.string().required('Event type is required'),
     }),
     onSubmit: async (values, { setSubmitting, resetForm }) => {
       await callAddEvent(values);
@@ -60,9 +71,22 @@ const AddEvent = () => {
     }
   };
 
+  const handleEventTypeChange = (e) => {
+    const type = e.target.value;
+    setEventType(type);
+    formik.setFieldValue('eventType', type);
+    // Clear the other field when switching types
+    if (type === 'online') {
+      formik.setFieldValue('location', '');
+    } else {
+      formik.setFieldValue('meetingLink', '');
+    }
+  };
+
   return (
     <div className="lg:col-span-3 w-full mx-auto p-6 bg-white rounded-lg lg:ml-6 border">
       <form onSubmit={formik.handleSubmit} className="w-full flex flex-col gap-4 mx-auto">
+        {/* Existing cover image section remains the same */}
         <div className="mb-4 border-b pb-4">
           <label className="block text-gray-700">Event Cover Image</label>
           <div className="flex items-center space-x-4">
@@ -94,6 +118,21 @@ const AddEvent = () => {
           <p className="text-gray-500 mt-2">PNG or JPG no bigger than 800px width and height</p>
         </div>
 
+        {/* Event Type Selector */}
+        <div>
+          <label className="block text-gray-700 mb-2">Event Type</label>
+          <select
+            name="eventType"
+            value={formik.values.eventType}
+            onChange={handleEventTypeChange}
+            className="block w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+          >
+            <option value="in-person">In-Person Event</option>
+            <option value="online">Online Event</option>
+          </select>
+        </div>
+
+        {/* Existing title, price, date, description fields remain the same */}
         <div>
           <input
             type="text"
@@ -102,8 +141,7 @@ const AddEvent = () => {
             value={formik.values.title}
             onChange={formik.handleChange}
             onBlur={formik.handleBlur}
-            className={`block w-full px-4 py-2 border ${formik.touched.title && formik.errors.title ? 'border-red-500' : 'border-gray-300'
-              } rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500`}
+            className={`block w-full px-4 py-2 border ${formik.touched.title && formik.errors.title ? 'border-red-500' : 'border-gray-300'} rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500`}
           />
           {formik.touched.title && formik.errors.title ? (
             <div className="text-red-500 text-sm">{formik.errors.title}</div>
@@ -118,34 +156,31 @@ const AddEvent = () => {
             value={formik.values.price}
             onChange={formik.handleChange}
             onBlur={formik.handleBlur}
-            className={`block w-full px-4 py-2 border ${formik.touched.price && formik.errors.price ? 'border-red-500' : 'border-gray-300'
-              } rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500`}
+            className={`block w-full px-4 py-2 border ${formik.touched.price && formik.errors.price ? 'border-red-500' : 'border-gray-300'} rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500`}
           />
           {formik.touched.price && formik.errors.price ? (
             <div className="text-red-500 text-sm">{formik.errors.price}</div>
           ) : null}
         </div>
-        
-  <div>
-  <input
-    type="datetime-local"
-    name="date"
-    placeholder="Event Date and Time"
-    value={formik.values.date}
-    onChange={(event) => {
-      const localDate = new Date(event.target.value); // Convert input to Date object
-      const utcDate = new Date(localDate.getTime() - localDate.getTimezoneOffset() * 60000); // Convert to UTC
-      formik.setFieldValue("date", utcDate.toISOString().slice(0, 16)); // Store UTC, keep 'YYYY-MM-DDTHH:MM' format
-    }}
-    onBlur={formik.handleBlur}
-    className={`block w-full px-4 py-2 border ${formik.touched.date && formik.errors.date ? 'border-red-500' : 'border-gray-300'
-      } rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500`}
-  />
-  {formik.touched.date && formik.errors.date ? (
-    <div className="text-red-500 text-sm">{formik.errors.date}</div>
-  ) : null}
-</div>
 
+        <div>
+          <input
+            type="datetime-local"
+            name="date"
+            placeholder="Event Date and Time"
+            value={formik.values.date}
+            onChange={(event) => {
+              const localDate = new Date(event.target.value);
+              const utcDate = new Date(localDate.getTime() - localDate.getTimezoneOffset() * 60000);
+              formik.setFieldValue("date", utcDate.toISOString().slice(0, 16));
+            }}
+            onBlur={formik.handleBlur}
+            className={`block w-full px-4 py-2 border ${formik.touched.date && formik.errors.date ? 'border-red-500' : 'border-gray-300'} rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500`}
+          />
+          {formik.touched.date && formik.errors.date ? (
+            <div className="text-red-500 text-sm">{formik.errors.date}</div>
+          ) : null}
+        </div>
 
         <div>
           <textarea
@@ -164,21 +199,38 @@ const AddEvent = () => {
           ) : null}
         </div>
 
-        <div>
-          <input
-            type="text"
-            name="location"
-            placeholder="Event Location"
-            value={formik.values.location}
-            onChange={formik.handleChange}
-            onBlur={formik.handleBlur}
-            className={`block w-full px-4 py-2 border ${formik.touched.location && formik.errors.location ? 'border-red-500' : 'border-gray-300'
-              } rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500`}
-          />
-          {formik.touched.location && formik.errors.location ? (
-            <div className="text-red-500 text-sm">{formik.errors.location}</div>
-          ) : null}
-        </div>
+        {/* Conditional fields based on event type */}
+        {eventType === 'in-person' ? (
+          <div>
+            <input
+              type="text"
+              name="location"
+              placeholder="Event Location"
+              value={formik.values.location}
+              onChange={formik.handleChange}
+              onBlur={formik.handleBlur}
+              className={`block w-full px-4 py-2 border ${formik.touched.location && formik.errors.location ? 'border-red-500' : 'border-gray-300'} rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500`}
+            />
+            {formik.touched.location && formik.errors.location ? (
+              <div className="text-red-500 text-sm">{formik.errors.location}</div>
+            ) : null}
+          </div>
+        ) : (
+          <div>
+            <input
+              type="url"
+              name="meetingLink"
+              placeholder="Meeting Link (e.g., https://zoom.us/j/123456)"
+              value={formik.values.meetingLink}
+              onChange={formik.handleChange}
+              onBlur={formik.handleBlur}
+              className={`block w-full px-4 py-2 border ${formik.touched.meetingLink && formik.errors.meetingLink ? 'border-red-500' : 'border-gray-300'} rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500`}
+            />
+            {formik.touched.meetingLink && formik.errors.meetingLink ? (
+              <div className="text-red-500 text-sm">{formik.errors.meetingLink}</div>
+            ) : null}
+          </div>
+        )}
 
         <div>
           <input
@@ -188,8 +240,7 @@ const AddEvent = () => {
             value={formik.values.capacity}
             onChange={formik.handleChange}
             onBlur={formik.handleBlur}
-            className={`block w-full px-4 py-2 border ${formik.touched.capacity && formik.errors.capacity ? 'border-red-500' : 'border-gray-300'
-              } rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500`}
+            className={`block w-full px-4 py-2 border ${formik.touched.capacity && formik.errors.capacity ? 'border-red-500' : 'border-gray-300'} rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500`}
           />
           {formik.touched.capacity && formik.errors.capacity ? (
             <div className="text-red-500 text-sm">{formik.errors.capacity}</div>
