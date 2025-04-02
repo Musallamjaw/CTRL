@@ -118,7 +118,7 @@ exports.getAllEvents = async (req, res) => {
     }
 
     const events = await Event.find(query)
-      .sort({ createdAt: 1 })
+      .sort({ createdAt: -1 })
       .skip(skip)
       .limit(limit);
 
