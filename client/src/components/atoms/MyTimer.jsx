@@ -49,7 +49,7 @@ export default function App() {
     const fetchClosestEvent = async () => {
       try {
         const response = await getClosestEvent();
-        const closestEvent = response?.data;
+        const closestEvent = response?.data?.data;
 
         if (closestEvent && closestEvent.date) {
           setEventDate(new Date(closestEvent.date));

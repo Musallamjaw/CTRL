@@ -6,6 +6,10 @@ import { Link } from "react-router-dom";
 
 function formatDate(dateString) {
   const date = new Date(dateString);
+
+  // Decrease 3 hours from the date
+  date.setHours(date.getHours() - 3);
+
   const options = {
     month: "long",
     day: "numeric",
@@ -13,7 +17,7 @@ function formatDate(dateString) {
     hour: "numeric",
     minute: "numeric",
     hour12: true,
-    timeZone: "UTC",
+    timeZone: "Asia/Kuwait",
   };
   return date.toLocaleDateString("en-US", options);
 }
@@ -27,7 +31,7 @@ function EventCard({
   date,
   location,
   meetingLink,
-  eventType = "in-person",
+  eventType,
   availableTickets,
   capacity,
   homeTickets,
@@ -59,37 +63,39 @@ function EventCard({
           <p className="mb-3 text-sm 2xmobile:text-base font-normal">
             {description}
           </p>
-          
+
           {/* Event Type Badge - Only shown for admin */}
           {homeTickets === "Admin" && (
             <div className="mb-2">
-              <span className={`px-2 py-1 rounded-full text-xs ${
-                eventType === 'online' ? 'bg-blue-500' : 'bg-green-500'
-              } text-white`}>
-                {eventType === 'online' ? 'Online Event' : 'In-Person Event'}
+              <span
+                className={`px-2 py-1 rounded-full text-xs ${
+                  eventType === "online" ? "bg-blue-500" : "bg-green-500"
+                } text-white`}
+              >
+                {eventType === "online" ? "Online Event" : "In-Person Event"}
               </span>
             </div>
           )}
-          
+
           <p className="mb-2 text-sm 2xmobile:text-base font-semibold tracking-tight">
             Date: {formatDate(date)}
           </p>
-          
+
           {/* Show location for all users */}
-          {eventType === 'in-person' && (
+          {eventType === "in-person" && (
             <p className="mb-2 text-sm 2xmobile:text-base font-semibold tracking-tight">
               Location: {location}
             </p>
           )}
-          
+
           {/* Show meeting link preview for online events */}
-          {eventType === 'online' && meetingLink && (
+          {eventType === "online" && meetingLink && (
             <p className="mb-2 text-sm 2xmobile:text-base font-semibold tracking-tight">
-              Online Meeting: <span className="text-blue-600">[Link Available]</span>
+              Online Meeting{" "}
             </p>
           )}
         </div>
-        
+
         <div className="w-full flex flex-col 2xmobile:flex-row justify-between gap-2 items-center">
           {/* Event status (open/closed) */}
           {availableTickets > 0 ? (
@@ -108,7 +114,7 @@ function EventCard({
             <span className="font-semibold"> {availableTickets}</span> from{" "}
             <span className="font-semibold"> {capacity}</span>
           </p>
-          
+
           {/* Join/View button */}
           {homeTickets === "Home" && (
             <Link
@@ -128,17 +134,17 @@ function EventCard({
                 },
               }}
               className={`px-4 py-2 font-semibold border border-slate-700 rounded-full hover:text-white ${
-                eventType === 'online' 
-                  ? 'hover:bg-blue-600' 
-                  : 'hover:bg-base-color'
+                eventType === "online"
+                  ? "hover:bg-blue-600"
+                  : "hover:bg-base-color"
               } transition-all duration-300`}
             >
-              {eventType === 'online' ? 'Join Online' : 'Join Event'}
+              {eventType === "online" ? "Join Online" : "Join Event"}
             </Link>
           )}
         </div>
       </div>
-      
+
       {/* QR Code for User Tickets view */}
       {homeTickets === "User" && (
         <img

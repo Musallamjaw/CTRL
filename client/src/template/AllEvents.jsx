@@ -105,6 +105,8 @@ export default function AllEvents() {
             location={event.location}
             price={event.price}
             capacity={event.capacity}
+            eventType={event.eventType}
+            meetingLink={event.meetingLink}
             availableTickets={event.availableTickets}
             homeTickets={"Admin"}
             handleDelete={() => handleDelete(event._id)}

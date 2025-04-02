@@ -37,7 +37,7 @@ const EventSchema = new mongoose.Schema(
     },
     price: { type: Number, required: true },
     capacity: { type: Number, required: true },
-    availableTickets: { type: Number, required: true },
+    availableTickets: { type: Number, required: true, default: 0 },
     coverImage: { type: String, required: true },
   },
   { timestamps: true }

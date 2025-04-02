@@ -2,6 +2,10 @@
 
 function formatDate(dateString) {
   const date = new Date(dateString);
+
+  // Decrease 3 hours from the date
+  date.setHours(date.getHours() - 3);
+
   const options = {
     month: "long",
     day: "numeric",
@@ -9,6 +13,7 @@ function formatDate(dateString) {
     hour: "numeric",
     minute: "numeric",
     hour12: true,
+    timeZone: "Asia/Kuwait",
   };
   return date.toLocaleDateString("en-US", options);
 }

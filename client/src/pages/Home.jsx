@@ -158,6 +158,8 @@ export default function Home() {
                   title={event.title}
                   description={event.description}
                   date={event.date}
+                  eventType={event.eventType}
+                  meetingLink={event.meetingLink}
                   location={event.location}
                   price={event.price}
                   capacity={event.capacity}

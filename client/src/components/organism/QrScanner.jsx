@@ -1,15 +1,15 @@
-import { Scanner } from '@yudiel/react-qr-scanner';
-import { useState, useEffect, useRef } from 'react';
-import { scanTicket } from '../../api/endpoints/tickets';
-import { getAllEventsForScanner } from '../../api/endpoints/events';
-import { toast } from 'react-toastify';
+import { Scanner } from "@yudiel/react-qr-scanner";
+import { useState, useEffect, useRef } from "react";
+import { scanTicket } from "../../api/endpoints/tickets";
+import { getAllEventsForScanner } from "../../api/endpoints/events";
+import { toast } from "react-toastify";
 
 const QrScanner = () => {
   const [cameraEnabled, setCameraEnabled] = useState(true);
   const [scanResult, setScanResult] = useState(null);
   const [events, setEvents] = useState([]);
-  const [selectedEvent, setSelectedEvent] = useState('');
-  const selectedEventRef = useRef(''); // create a reference for selectedEvent
+  const [selectedEvent, setSelectedEvent] = useState("");
+  const selectedEventRef = useRef(""); // create a reference for selectedEvent
 
   useEffect(() => {
     selectedEventRef.current = selectedEvent; // update the reference when selectedEvent changes
@@ -19,9 +19,9 @@ const QrScanner = () => {
     const fetchEvents = async () => {
       try {
         const response = await getAllEventsForScanner();
-        setEvents(response.data);
+        setEvents(response?.data?.data || []);
       } catch (error) {
-        toast.error('Error fetching events:', error);
+        toast.error("Error fetching events:", error);
       }
     };
 
@@ -48,7 +48,9 @@ const QrScanner = () => {
               const response = await scanTicket(text);
               setScanResult(response.data.message);
             } catch (ticketError) {
-              setScanResult("Error scanning the ticket: " + ticketError.message);
+              setScanResult(
+                "Error scanning the ticket: " + ticketError.message
+              );
             }
           } else {
             setScanResult("This ticket is not available for this event.");
@@ -90,13 +92,22 @@ const QrScanner = () => {
           ))}
         </select>
       </div>
-      <p className={`text-3xl font-black mb-4 ${scanResult === 'Ticket used successfully' ? ('text-green-500') : (scanResult === 'Ticket already used' || scanResult === 'Ticket not found') ? ('text-red-500') : ''}`}>
-        {scanResult ? `"${scanResult}"` : 'Scan QR Code'}
+      <p
+        className={`text-3xl font-black mb-4 ${
+          scanResult === "Ticket used successfully"
+            ? "text-green-500"
+            : scanResult === "Ticket already used" ||
+              scanResult === "Ticket not found"
+            ? "text-red-500"
+            : ""
+        }`}
+      >
+        {scanResult ? `"${scanResult}"` : "Scan QR Code"}
       </p>
       {cameraEnabled ? (
         <Scanner onScan={handleScan} onError={handleError} />
       ) : (
-        <p className='text-2xl'>Open Your Camera</p>
+        <p className="text-2xl">Open Your Camera</p>
       )}
     </div>
   );

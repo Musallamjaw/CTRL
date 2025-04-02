@@ -103,7 +103,7 @@ const AddEvent = () => {
           toast.success("Event created successfully!");
           resetForm();
           setCoverImagePreview("");
-          navigate("/admin/events"); // Redirect to events list
+          navigate("/admin/allEvents"); // Redirect to events list
         }
       } catch (error) {
         console.error("Submission error:", error);

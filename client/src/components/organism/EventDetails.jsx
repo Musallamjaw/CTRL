@@ -32,8 +32,8 @@ const EventDetails = () => {
 
   const handleParticipate = async () => {
     // For online events, redirect immediately to the meeting link if already registered
-    if (event.eventType === 'online' && isPurchased && event.meetingLink) {
-      window.open(event.meetingLink, '_blank');
+    if (event.eventType === "online" && isPurchased && event.meetingLink) {
+      window.open(event.meetingLink, "_blank");
       return;
     }
 
@@ -62,11 +62,11 @@ const EventDetails = () => {
       } else {
         toast.success(response.data.message);
         setIsPurchased(true);
-        
+
         // For online events, redirect to meeting link after registration
-        if (event.eventType === 'online' && event.meetingLink) {
+        if (event.eventType === "online" && event.meetingLink) {
           setTimeout(() => {
-            window.open(event.meetingLink, '_blank');
+            window.open(event.meetingLink, "_blank");
             navigate("/");
           }, 2000);
         } else {
@@ -102,24 +102,28 @@ const EventDetails = () => {
           <div className="md:ml-8 mt-4 text-center">
             <h1 className="text-3xl font-bold text-gray-800">{event.title}</h1>
             <p className="mt-4 text-gray-600">{event.description}</p>
-
             {/* Event Type Badge */}
-            <div className="mt-2">
-              <span className={`px-3 py-1 rounded-full text-sm ${
-                event.eventType === 'online' ? 'bg-blue-500' : 'bg-green-500'
-              } text-white`}>
-                {event.eventType === 'online' ? 'Online Event' : 'In-Person Event'}
-              </span>
-            </div>
-
+            {event.eventType === "online" ? null : (
+              <div className="mt-2">
+                <span
+                  className={`px-3 py-1 rounded-full text-sm ${
+                    event.eventType === "online" ? "" : "bg-green-500"
+                  } text-white`}
+                >
+                  {event.eventType === "online" ? "" : "In-Person Event"}
+                </span>
+              </div>
+            )}
             {/* Location/Meeting Link */}
             <div className="mt-4">
-              {event.eventType === 'online' ? (
+              {event.eventType === "online" && isPurchased ? ( //     rel="noopener noreferrer" //     target="_blank" //     href={event.meetingLink} //   <a //   <strong>Meeting Link:</strong> // <p className="text-gray-600">
+                //     className="text-blue-500 hover:underline ml-2"
+                //   >
+                //     Click to join
+                //   </a>
+                // </p>
                 <p className="text-gray-600">
-                  <strong>Meeting Link:</strong> 
-                  <a href={event.meetingLink} target="_blank" rel="noopener noreferrer" className="text-blue-500 hover:underline ml-2">
-                    Click to join
-                  </a>
+                  <strong>Location:</strong> {event.eventType}
                 </p>
               ) : (
                 <p className="text-gray-600">
@@ -127,32 +131,41 @@ const EventDetails = () => {
                 </p>
               )}
             </div>
-
             {/* Date */}
             <p className="mt-2 text-gray-600">
               <strong>Date:</strong> {new Date(event.date).toLocaleString()}
             </p>
-
             {/* Participate Button */}
-            <button
-              onClick={handleParticipate}
-              className={`mt-8 text-lg inline-block w-full xmobile:w-2/3 ${
-                event.eventType === 'online' && isPurchased ? 'bg-blue-600' : 'bg-base-color'
-              } text-white font-semibold py-3 shadow-gray-900 rounded-lg hover:bg-blue-600 text-center hover:shadow-xl transition-all duration-300 ${
-                isLoading ? "opacity-50 cursor-not-allowed" : ""
-              }`}
-              disabled={isLoading}
-            >
-              {isLoading
-                ? "LOADING..."
-                : isPurchased
-                ? event.eventType === 'online' 
-                  ? "JOIN MEETING NOW"
-                  : "ALREADY REGISTERED"
-                : "REGISTER IN THE EVENT"}
-            </button>
-
-            {/* Category and Availability */}
+            {event.availableTickets === 0 && !isPurchased ? (
+              <button
+                onClick={null}
+                className={`mt-8 text-lg inline-block w-full xmobile:w-2/3 bg-red-500 text-white font-semibold py-3 shadow-gray-900 rounded-lg hover:bg-blue-600 text-center hover:shadow-xl transition-all duration-300 cursor-not-allowed`}
+                disabled={true}
+              >
+                Event Closed
+              </button>
+            ) : (
+              <button
+                onClick={handleParticipate}
+                className={`mt-8 text-lg inline-block w-full xmobile:w-2/3 ${
+                  event.eventType === "online" && isPurchased
+                    ? "bg-blue-600"
+                    : "bg-base-color"
+                } text-white font-semibold py-3 shadow-gray-900 rounded-lg hover:bg-blue-600 text-center hover:shadow-xl transition-all duration-300 ${
+                  isLoading ? "opacity-50 cursor-not-allowed" : ""
+                }`}
+                disabled={isLoading}
+              >
+                {isLoading
+                  ? "LOADING..."
+                  : isPurchased
+                  ? event.eventType === "online"
+                    ? "JOIN MEETING NOW"
+                    : "ALREADY REGISTERED"
+                  : "REGISTER IN THE EVENT"}
+              </button>
+            )}
+            {/* Category and Availability
             <div className="mt-8">
               <p className="text-gray-600">
                 <strong>Available Tickets:</strong>
@@ -160,7 +173,7 @@ const EventDetails = () => {
                   {event.availableTickets}
                 </span>
               </p>
-            </div>
+            </div> */}
           </div>
         </div>
       </div>

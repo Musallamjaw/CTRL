@@ -1,25 +1,37 @@
-const Event = require('../models/Event.model');
-const { uploadUserCoverImage } = require('../middleware/multerConfig');
+const Event = require("../models/Event.model");
+const { uploadUserCoverImage } = require("../middleware/multerConfig");
 
 // Helper function to validate event data
 const validateEventData = (eventType, data) => {
-  if (!data.title || !data.description || !data.date || !data.price || !data.capacity) {
-    return { valid: false, message: 'All required fields must be filled' };
+  if (
+    !data.title ||
+    !data.description ||
+    !data.date ||
+    !data.price ||
+    !data.capacity
+  ) {
+    return { valid: false, message: "All required fields must be filled" };
   }
 
-  if (eventType === 'in-person' && !data.location) {
-    return { valid: false, message: 'Location is required for in-person events' };
+  if (eventType === "in-person" && !data.location) {
+    return {
+      valid: false,
+      message: "Location is required for in-person events",
+    };
   }
 
-  if (eventType === 'online' && !data.meetingLink) {
-    return { valid: false, message: 'Meeting link is required for online events' };
+  if (eventType === "online" && !data.meetingLink) {
+    return {
+      valid: false,
+      message: "Meeting link is required for online events",
+    };
   }
 
-  if (eventType === 'online' && data.meetingLink) {
+  if (eventType === "online" && data.meetingLink) {
     try {
       new URL(data.meetingLink);
     } catch (err) {
-      return { valid: false, message: 'Meeting link must be a valid URL' };
+      return { valid: false, message: "Meeting link must be a valid URL" };
     }
   }
 
@@ -30,30 +42,30 @@ const validateEventData = (eventType, data) => {
 exports.createEvent = async (req, res) => {
   uploadUserCoverImage(req, res, async (err) => {
     if (err) {
-      return res.status(400).json({ 
+      return res.status(400).json({
         success: false,
-        message: err.message 
+        message: err.message,
       });
     }
 
     try {
-      const { 
-        title, 
-        description, 
-        date, 
-        location, 
-        meetingLink, 
-        price, 
-        capacity, 
-        eventType = 'in-person' 
+      const {
+        title,
+        description,
+        date,
+        location,
+        meetingLink,
+        price,
+        capacity,
+        eventType,
       } = req.body;
 
       // Validate input data
       const validation = validateEventData(eventType, req.body);
       if (!validation.valid) {
-        return res.status(400).json({ 
+        return res.status(400).json({
           success: false,
-          message: validation.message 
+          message: validation.message,
         });
       }
 
@@ -62,13 +74,13 @@ exports.createEvent = async (req, res) => {
         title,
         description,
         date: new Date(date),
-        location: eventType === 'in-person' ? location : 'Online Event',
-        meetingLink: eventType === 'online' ? meetingLink : undefined,
+        location: eventType === "in-person" ? location : "Online Event",
+        meetingLink: eventType === "online" ? meetingLink : undefined,
         eventType,
         price: parseFloat(price),
         capacity: parseInt(capacity),
         availableTickets: parseInt(capacity),
-        coverImage: req.file ? req.file.filename : 'default-event.jpg'
+        coverImage: req.file ? req.file.filename : "default-event.jpg",
       });
 
       // Save to database
@@ -76,16 +88,15 @@ exports.createEvent = async (req, res) => {
 
       return res.status(201).json({
         success: true,
-        message: 'Event created successfully',
-        data: savedEvent
+        message: "Event created successfully",
+        data: savedEvent,
       });
-
     } catch (error) {
-      console.error('Error creating event:', error);
+      console.error("Error creating event:", error);
       return res.status(500).json({
         success: false,
-        message: 'Failed to create event',
-        error: error.message
+        message: "Failed to create event",
+        error: error.message,
       });
     }
   });
@@ -94,15 +105,15 @@ exports.createEvent = async (req, res) => {
 // Get all events with pagination and filtering
 exports.getAllEvents = async (req, res) => {
   try {
-    const page = parseInt(req.query.page) || 1;
-    const limit = parseInt(req.query.limit) || 10;
+    const page = parseInt(req.params.page) || 1;
+    const limit = parseInt(req.params.limit) || 4;
     const skip = (page - 1) * limit;
-    const filter = req.query.filter || 'all';
+    const filter = req.params.filter || "all";
 
     let query = {};
-    if (filter === 'open') {
+    if (filter === "open") {
       query.availableTickets = { $gt: 0 };
-    } else if (filter === 'closed') {
+    } else if (filter === "closed") {
       query.availableTickets = 0;
     }
 
@@ -119,16 +130,15 @@ exports.getAllEvents = async (req, res) => {
       pagination: {
         currentPage: page,
         totalPages: Math.ceil(totalEvents / limit),
-        totalEvents
-      }
+        totalEvents,
+      },
     });
-
   } catch (error) {
-    console.error('Error fetching events:', error);
+    console.error("Error fetching events:", error);
     return res.status(500).json({
       success: false,
-      message: 'Failed to fetch events',
-      error: error.message
+      message: "Failed to fetch events",
+      error: error.message,
     });
   }
 };
@@ -140,21 +150,20 @@ exports.getEventById = async (req, res) => {
     if (!event) {
       return res.status(404).json({
         success: false,
-        message: 'Event not found'
+        message: "Event not found",
       });
     }
 
     return res.status(200).json({
       success: true,
-      data: event
+      data: event,
     });
-
   } catch (error) {
-    console.error('Error fetching event:', error);
+    console.error("Error fetching event:", error);
     return res.status(500).json({
       success: false,
-      message: 'Failed to fetch event',
-      error: error.message
+      message: "Failed to fetch event",
+      error: error.message,
     });
   }
 };
@@ -163,31 +172,31 @@ exports.getEventById = async (req, res) => {
 exports.updateEventById = async (req, res) => {
   uploadUserCoverImage(req, res, async (err) => {
     if (err) {
-      return res.status(400).json({ 
+      return res.status(400).json({
         success: false,
-        message: err.message 
+        message: err.message,
       });
     }
 
     try {
-      const { 
-        title, 
-        description, 
-        date, 
-        location, 
-        meetingLink, 
-        price, 
-        capacity, 
+      const {
+        title,
+        description,
+        date,
+        location,
+        meetingLink,
+        price,
+        capacity,
         availableTickets,
-        eventType = 'in-person' 
+        eventType = "in-person",
       } = req.body;
 
       // Validate input data
       const validation = validateEventData(eventType, req.body);
       if (!validation.valid) {
-        return res.status(400).json({ 
+        return res.status(400).json({
           success: false,
-          message: validation.message 
+          message: validation.message,
         });
       }
 
@@ -195,12 +204,12 @@ exports.updateEventById = async (req, res) => {
         title,
         description,
         date: new Date(date),
-        location: eventType === 'in-person' ? location : 'Online Event',
-        meetingLink: eventType === 'online' ? meetingLink : undefined,
+        location: eventType === "in-person" ? location : "Online Event",
+        meetingLink: eventType === "online" ? meetingLink : undefined,
         eventType,
         price: parseFloat(price),
         capacity: parseInt(capacity),
-        availableTickets: parseInt(availableTickets)
+        availableTickets: parseInt(availableTickets),
       };
 
       if (req.file) {
@@ -216,22 +225,21 @@ exports.updateEventById = async (req, res) => {
       if (!updatedEvent) {
         return res.status(404).json({
           success: false,
-          message: 'Event not found'
+          message: "Event not found",
         });
       }
 
       return res.status(200).json({
         success: true,
-        message: 'Event updated successfully',
-        data: updatedEvent
+        message: "Event updated successfully",
+        data: updatedEvent,
       });
-
     } catch (error) {
-      console.error('Error updating event:', error);
+      console.error("Error updating event:", error);
       return res.status(500).json({
         success: false,
-        message: 'Failed to update event',
-        error: error.message
+        message: "Failed to update event",
+        error: error.message,
       });
     }
   });
@@ -244,21 +252,20 @@ exports.deleteEventById = async (req, res) => {
     if (!deletedEvent) {
       return res.status(404).json({
         success: false,
-        message: 'Event not found'
+        message: "Event not found",
       });
     }
 
     return res.status(200).json({
       success: true,
-      message: 'Event deleted successfully'
+      message: "Event deleted successfully",
     });
-
   } catch (error) {
-    console.error('Error deleting event:', error);
+    console.error("Error deleting event:", error);
     return res.status(500).json({
       success: false,
-      message: 'Failed to delete event',
-      error: error.message
+      message: "Failed to delete event",
+      error: error.message,
     });
   }
 };
@@ -267,27 +274,27 @@ exports.deleteEventById = async (req, res) => {
 exports.getClosestEvent = async (req, res) => {
   try {
     const now = new Date();
-    const closestEvent = await Event.findOne({ date: { $gt: now } })
-      .sort({ date: 1 });
+    const closestEvent = await Event.findOne({ date: { $gt: now } }).sort({
+      date: 1,
+    });
 
     if (!closestEvent) {
       return res.status(404).json({
         success: false,
-        message: 'No upcoming events found'
+        message: "No upcoming events found",
       });
     }
 
     return res.status(200).json({
       success: true,
-      data: closestEvent
+      data: closestEvent,
     });
-
   } catch (error) {
-    console.error('Error fetching closest event:', error);
+    console.error("Error fetching closest event:", error);
     return res.status(500).json({
       success: false,
-      message: 'Failed to fetch closest event',
-      error: error.message
+      message: "Failed to fetch closest event",
+      error: error.message,
     });
   }
 };
@@ -298,9 +305,9 @@ exports.getCountEvents = async (req, res) => {
     const filter = req.params.filter;
     let query = {};
 
-    if (filter === 'open') {
+    if (filter === "open") {
       query.availableTickets = { $gt: 0 };
-    } else if (filter === 'closed') {
+    } else if (filter === "closed") {
       query.availableTickets = 0;
     }
 
@@ -308,15 +315,14 @@ exports.getCountEvents = async (req, res) => {
 
     return res.status(200).json({
       success: true,
-      count
+      count,
     });
-
   } catch (error) {
-    console.error('Error counting events:', error);
+    console.error("Error counting events:", error);
     return res.status(500).json({
       success: false,
-      message: 'Failed to count events',
-      error: error.message
+      message: "Failed to count events",
+      error: error.message,
     });
   }
 };
@@ -330,19 +336,18 @@ exports.getAllEventsForScanner = async (req, res) => {
 
     const events = await Event.find({ date: { $gte: yesterday } })
       .sort({ date: 1 })
-      .select('_id title date eventType');
+      .select("_id title date eventType");
 
     return res.status(200).json({
       success: true,
-      data: events
+      data: events,
     });
-
   } catch (error) {
-    console.error('Error fetching events for scanner:', error);
+    console.error("Error fetching events for scanner:", error);
     return res.status(500).json({
       success: false,
-      message: 'Failed to fetch events for scanner',
-      error: error.message
+      message: "Failed to fetch events for scanner",
+      error: error.message,
     });
   }
 };
