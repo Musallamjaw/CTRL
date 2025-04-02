@@ -2,6 +2,23 @@ import { useState, useEffect } from "react";
 import { useTimer } from "react-timer-hook";
 import { getClosestEvent } from "../../api/endpoints/events";
 
+function formatDate(dateString) {
+  const date = new Date(dateString);
+
+  // Decrease 3 hours from the date
+  date.setHours(date.getHours() - 3);
+
+  const options = {
+    month: "long",
+    day: "numeric",
+    year: "numeric",
+    hour: "numeric",
+    minute: "numeric",
+    hour12: true,
+    timeZone: "Asia/Kuwait",
+  };
+  return date.toLocaleDateString("en-US", options);
+}
 // eslint-disable-next-line react/prop-types
 function MyTimer({ expiryTimestamp }) {
   const { seconds, minutes, hours, days } = useTimer({
@@ -85,7 +102,7 @@ export default function App() {
 
   return (
     <div className="z-10">
-      <MyTimer expiryTimestamp={eventDate} />
+      <MyTimer expiryTimestamp={formatDate(eventDate)} />
     </div>
   );
 }

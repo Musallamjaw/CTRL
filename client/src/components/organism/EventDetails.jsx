@@ -133,7 +133,12 @@ const EventDetails = () => {
             </div>
             {/* Date */}
             <p className="mt-2 text-gray-600">
-              <strong>Date:</strong> {new Date(event.date).toLocaleString()}
+              <strong>Date:</strong>{" "}
+              {new Date(
+                new Date(event.date).getTime() - 3 * 60 * 60 * 1000
+              ).toLocaleString("en-US", {
+                timeZone: "Asia/Kuwait",
+              })}
             </p>
             {/* Participate Button */}
             {event.availableTickets === 0 && !isPurchased ? (
