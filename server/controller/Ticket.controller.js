@@ -46,17 +46,30 @@ const sendEmail = async (email, subject, tickets) => {
   const ticketsHtml = tickets
     .map(
       (ticket, index) => `
-    <div style="border:1px solid #000; color:white; padding:10px; margin-bottom:10px; max-width:300px; border-radius: 1rem; text-align:center; background-color: rgb(20, 16, 44);">
-      <h2>${ticket.eventData.title}</h2>
-      <p>Date: ${new Date(
+    <div style="border: 1px solid #ddd; padding: 20px; margin-bottom: 20px; max-width: 400px; border-radius: 10px; text-align: center; background-color: #f9f9f9; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);">
+      <h2 style="color: #333; font-size: 20px; margin-bottom: 10px;">${
+        ticket.eventData.title
+      }</h2>
+      <p style="color: #555; font-size: 14px; margin: 5px 0;">Date: ${new Date(
         ticket.eventData.date
-      ).toLocaleDateString()} at ${new Date(
-        ticket.eventData.date
-      ).toLocaleTimeString()}</p>
-      <p>Location: ${ticket.eventData.location}</p>
+      ).toLocaleDateString("en-US", { timeZone: "Asia/Kuwait" })} at ${new Date(
+        new Date(ticket.eventData.date).getTime() - 3 * 60 * 60 * 1000
+      ).toLocaleTimeString(
+        "en-US",
+        { timeZone: "Asia/Kuwait" },
+        { hour12: true, hour: "2-digit", minute: "2-digit" }
+      )}</p>
+      <p style="color: #555; font-size: 14px; margin: 5px 0;">Location: ${
+        ticket.eventData.location
+      }</p>
+      ${
+        ticket.eventData.eventType === "online"
+          ? `<p style="color: #007bff; font-size: 14px; margin: 5px 0;">Join Link: <a href="${ticket.eventData.meetingLink}" target="_blank" style="color: #007bff; text-decoration: none;">${ticket.eventData.meetingLink}</a></p>`
+          : ""
+      }
       <img src="cid:image${
         index + 1
-      }" alt="QR Code" style="width:100%; border-radius: 1rem;"/>
+      }" alt="QR Code" style="width: 100%; max-width: 200px; margin-top: 10px; border-radius: 10px;"/>
     </div>
   `
     )

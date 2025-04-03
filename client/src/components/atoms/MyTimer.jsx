@@ -2,23 +2,6 @@ import { useState, useEffect } from "react";
 import { useTimer } from "react-timer-hook";
 import { getClosestEvent } from "../../api/endpoints/events";
 
-function formatDate(dateString) {
-  const date = new Date(dateString);
-
-  // Decrease 3 hours from the date
-  date.setHours(date.getHours() - 3);
-
-  const options = {
-    month: "long",
-    day: "numeric",
-    year: "numeric",
-    hour: "numeric",
-    minute: "numeric",
-    hour12: true,
-    timeZone: "Asia/Kuwait",
-  };
-  return date.toLocaleDateString("en-US", options);
-}
 // eslint-disable-next-line react/prop-types
 function MyTimer({ expiryTimestamp }) {
   const { seconds, minutes, hours, days } = useTimer({
@@ -69,7 +52,9 @@ export default function App() {
         const closestEvent = response?.data?.data;
 
         if (closestEvent && closestEvent.date) {
-          setEventDate(new Date(closestEvent.date));
+          const adjustedDate = new Date(closestEvent.date);
+          adjustedDate.setHours(adjustedDate.getHours() - 3);
+          setEventDate(adjustedDate);
         } else if (closestEvent?.message === "There are no upcoming events.") {
           setNoEventsMessage("There are no upcoming events.");
         } else {
@@ -102,7 +87,7 @@ export default function App() {
 
   return (
     <div className="z-10">
-      <MyTimer expiryTimestamp={formatDate(eventDate)} />
+      <MyTimer expiryTimestamp={eventDate} />
     </div>
   );
 }
