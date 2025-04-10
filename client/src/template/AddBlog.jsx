@@ -15,98 +15,6 @@ const AddBlog = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const navigate = useNavigate();
 
-  // --- File & Image Handlers ---
-
-  const handleFileChange = useCallback(
-    (event) => {
-      const file = event.target.files[0];
-      if (file) {
-        formik.setFieldValue("file", file);
-        setFilePreview(file.name); // Store file name for preview
-        setImagePreviews([]); // Clear image previews if switching type implicitly
-      } else {
-        formik.setFieldValue("file", null);
-        setFilePreview(null);
-      }
-    },
-    [formik]
-  ); // Add formik to dependency array
-
-  const handleImagesChange = useCallback(
-    (event) => {
-      const files = Array.from(event.target.files); // Convert FileList to Array
-
-      if (files.length > MAX_IMAGES) {
-        toast.error(`You can upload a maximum of ${MAX_IMAGES} images.`);
-        // Keep existing selection or clear it based on desired UX
-        // formik.setFieldValue("images", []); // Option: Clear selection
-        // setImagePreviews([]);          // Option: Clear previews
-        return; // Prevent updating formik state if too many files selected
-      }
-
-      if (files.length > 0) {
-        formik.setFieldValue("images", files);
-        setFilePreview(null); // Clear file preview
-
-        // Generate previews
-        const previewUrls = [];
-        const readers = [];
-        files.forEach((file) => {
-          const reader = new FileReader();
-          readers.push(
-            new Promise((resolve) => {
-              reader.onloadend = () => {
-                previewUrls.push(reader.result);
-                resolve();
-              };
-              reader.readAsDataURL(file);
-            })
-          );
-        });
-        // Update previews once all files are read
-        Promise.all(readers).then(() => {
-          setImagePreviews(previewUrls);
-        });
-      } else {
-        formik.setFieldValue("images", []);
-        setImagePreviews([]);
-      }
-    },
-    [formik]
-  ); // Add formik to dependency array
-
-  const handleBlogTypeChange = (e) => {
-    const newType = e.target.value;
-    setBlogType(newType);
-    formik.setFieldValue("blogType", newType);
-
-    // Reset fields not relevant to the new type to clear values and validation
-    if (newType !== "file") {
-      formik.setFieldValue("file", null);
-      setFilePreview(null);
-    }
-    if (newType !== "images") {
-      formik.setFieldValue("images", []);
-      setImagePreviews([]);
-    }
-    if (newType !== "content") {
-      formik.setFieldValue("content", "");
-    }
-    // Reset touched status for fields being hidden to prevent lingering errors
-    formik.setTouched(
-      {
-        title: formik.touched.title,
-        description: formik.touched.description,
-        // Keep touched status only for relevant fields
-        file: newType === "file" ? formik.touched.file : false,
-        images: newType === "images" ? formik.touched.images : false,
-        content: newType === "content" ? formik.touched.content : false,
-        blogType: true, // Always mark blogType as touched on change
-      },
-      false
-    ); // 'false' means don't run validation after resetting touched
-  };
-
   // --- Formik Setup ---
 
   const formik = useFormik({
@@ -198,6 +106,98 @@ const AddBlog = () => {
       }
     },
   });
+
+  // --- File & Image Handlers ---
+
+  const handleFileChange = useCallback(
+    (event) => {
+      const file = event.target.files[0];
+      if (file) {
+        formik.setFieldValue("file", file);
+        setFilePreview(file.name); // Store file name for preview
+        setImagePreviews([]); // Clear image previews if switching type implicitly
+      } else {
+        formik.setFieldValue("file", null);
+        setFilePreview(null);
+      }
+    },
+    [formik]
+  ); // Add formik to dependency array
+
+  const handleImagesChange = useCallback(
+    (event) => {
+      const files = Array.from(event.target.files); // Convert FileList to Array
+
+      if (files.length > MAX_IMAGES) {
+        toast.error(`You can upload a maximum of ${MAX_IMAGES} images.`);
+        // Keep existing selection or clear it based on desired UX
+        // formik.setFieldValue("images", []); // Option: Clear selection
+        // setImagePreviews([]);          // Option: Clear previews
+        return; // Prevent updating formik state if too many files selected
+      }
+
+      if (files.length > 0) {
+        formik.setFieldValue("images", files);
+        setFilePreview(null); // Clear file preview
+
+        // Generate previews
+        const previewUrls = [];
+        const readers = [];
+        files.forEach((file) => {
+          const reader = new FileReader();
+          readers.push(
+            new Promise((resolve) => {
+              reader.onloadend = () => {
+                previewUrls.push(reader.result);
+                resolve();
+              };
+              reader.readAsDataURL(file);
+            })
+          );
+        });
+        // Update previews once all files are read
+        Promise.all(readers).then(() => {
+          setImagePreviews(previewUrls);
+        });
+      } else {
+        formik.setFieldValue("images", []);
+        setImagePreviews([]);
+      }
+    },
+    [formik]
+  ); // Add formik to dependency array
+
+  const handleBlogTypeChange = (e) => {
+    const newType = e.target.value;
+    setBlogType(newType);
+    formik.setFieldValue("blogType", newType);
+
+    // Reset fields not relevant to the new type to clear values and validation
+    if (newType !== "file") {
+      formik.setFieldValue("file", null);
+      setFilePreview(null);
+    }
+    if (newType !== "images") {
+      formik.setFieldValue("images", []);
+      setImagePreviews([]);
+    }
+    if (newType !== "content") {
+      formik.setFieldValue("content", "");
+    }
+    // Reset touched status for fields being hidden to prevent lingering errors
+    formik.setTouched(
+      {
+        title: formik.touched.title,
+        description: formik.touched.description,
+        // Keep touched status only for relevant fields
+        file: newType === "file" ? formik.touched.file : false,
+        images: newType === "images" ? formik.touched.images : false,
+        content: newType === "content" ? formik.touched.content : false,
+        blogType: true, // Always mark blogType as touched on change
+      },
+      false
+    ); // 'false' means don't run validation after resetting touched
+  };
 
   // --- JSX ---
   return (
