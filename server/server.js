@@ -12,6 +12,7 @@ const eventRoutes = require("./routes/Event.route.js");
 const userRoutes = require("./routes/User.route.js");
 const ticketsRoutes = require("./routes/Ticket.route.js");
 const contactRoutes = require("./routes/Contact.route.js");
+const blogRoutes = require("./routes/Blog.route.js");
 // Load environment variables
 dotenv.config();
 
@@ -56,6 +57,7 @@ app.use("/api/events", eventRoutes);
 app.use("/api/user", userRoutes);
 app.use("/api/tickets", ticketsRoutes);
 app.use("/api/contact", contactRoutes);
+app.use("/api/blogs", blogRoutes);
 
 // Serve static files from the 'client/dist' directory
 app.use(express.static(path.join(__dirname, "/client/dist")));
