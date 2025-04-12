@@ -75,7 +75,7 @@ export default function Admin() {
                   Add Event
                 </Link>
 
-                <Link
+                {/* <Link
                   to="addBlog"
                   className={`flex items-center gap-2 ${
                     location.pathname === "/admin/addBlogs"
@@ -96,7 +96,7 @@ export default function Admin() {
                 >
                   <MdOutlineAddToPhotos />
                   All Blogs
-                </Link>
+                </Link> */}
                 <Link
                   to="settings"
                   className={`flex items-center gap-2 ${
