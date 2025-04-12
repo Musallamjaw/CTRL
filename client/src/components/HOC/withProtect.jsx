@@ -22,6 +22,7 @@ export default function ProtectdRoute({ element, path }) {
           path === "/admin/settings" ||
           path === "/admin/addEvent" ||
           path === "/admin/addBlog" ||
+          path === "/admin/allBlogs" ||
           path === "/admin/allEvents" ||
           path === "/admin/allEvents/editEvent" ||
           path === "/qrScanner")

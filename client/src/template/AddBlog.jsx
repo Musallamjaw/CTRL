@@ -94,8 +94,8 @@ const AddBlog = () => {
           setImagePreviews([]);
           setFilePreview(null);
           setBlogType("content"); // Reset dropdown to default
-          // navigate("/admin/allBlogs"); // Redirect to blogs list (adjust path)
-          navigate(-1); // Or navigate back
+          navigate("/admin/allBlogs"); // Redirect to blogs list (adjust path)
+          // navigate(-1); // Or navigate back
         }
       } catch (error) {
         // Catch any unexpected errors during API call

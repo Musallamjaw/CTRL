@@ -7,3 +7,8 @@ export const createBlog = (formData) => {
     },
   });
 };
+
+export const getAllBlogs = (page, filter) => {
+  const url = `/blogs/all/${page}/${filter}`;
+  return axiosInstance.get(url);
+};

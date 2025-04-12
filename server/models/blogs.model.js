@@ -11,9 +11,13 @@ const blogSchema = new mongoose.Schema({
     required: true,
     trim: true,
   },
+  blogType: {
+    type: String,
+    enum: ["content", "file", "images"],
+    require: true,
+  },
   content: {
     type: String,
-    required: true, // full HTML or markdown content
   },
   files: [
     {

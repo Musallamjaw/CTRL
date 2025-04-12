@@ -109,6 +109,7 @@ exports.createBlog = async (req, res) => {
         title,
         description,
         content: finalContent,
+        blogType,
         // Schema expects 'files' as an array, even for single file
         files: fileUrl ? [fileUrl] : [],
         images: imageUrls,
@@ -143,4 +144,43 @@ exports.createBlog = async (req, res) => {
       });
     }
   }); // End of uploadBlogMedia callback
+};
+
+// Get all Blogs with pagination and filtering
+exports.getAllBlogs = async (req, res) => {
+  try {
+    const page = parseInt(req.params.page) || 1;
+    const limit = parseInt(req.params.limit) || 4;
+    const skip = (page - 1) * limit;
+    const filter = req.params.filter || "all";
+
+    let query = {};
+    if (filter !== "all") {
+      query.blogType = filter;
+    }
+
+    const Blogs = await Blog.find(query)
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit);
+
+    const totalBlogs = await Blog.countDocuments(query);
+
+    return res.status(200).json({
+      success: true,
+      data: Blogs,
+      pagination: {
+        currentPage: page,
+        totalPages: Math.ceil(totalBlogs / limit),
+        totalBlogs,
+      },
+    });
+  } catch (error) {
+    console.error("Error fetching Blogs:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Failed to fetch Blogs",
+      error: error.message,
+    });
+  }
 };

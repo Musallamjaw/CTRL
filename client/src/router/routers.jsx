@@ -23,6 +23,7 @@ import LoginForm from "../components/organism/LogInForm";
 import ForgotPasswordForm from "../components/organism/ForgotPasswordForm";
 import ResetPasswordForm from "../components/organism/ResetPasswordForm";
 import AddBlog from "../template/AddBlog";
+import BlogList from "../template/AllBlogs";
 
 const router = createBrowserRouter([
   {
@@ -76,6 +77,10 @@ const router = createBrowserRouter([
           {
             path: "addBlog",
             element: <AddBlog />,
+          },
+          {
+            path: "allBlogs",
+            element: <BlogList />,
           },
         ],
       },

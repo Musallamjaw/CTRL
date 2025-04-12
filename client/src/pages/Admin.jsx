@@ -74,16 +74,28 @@ export default function Admin() {
                   <MdOutlineAddToPhotos />
                   Add Event
                 </Link>
+
                 <Link
                   to="addBlog"
                   className={`flex items-center gap-2 ${
-                    location.pathname === "/admin/addBlog"
+                    location.pathname === "/admin/addBlogs"
                       ? "hover:text-gray-500 text-base-color"
                       : "text-gray-500 hover:text-base-color"
                   } `}
                 >
                   <MdOutlineAddToPhotos />
                   Add Blog
+                </Link>
+                <Link
+                  to="AllBlogs"
+                  className={`flex items-center gap-2 ${
+                    location.pathname === "/admin/allBlogs"
+                      ? "hover:text-gray-500 text-base-color"
+                      : "text-gray-500 hover:text-base-color"
+                  } `}
+                >
+                  <MdOutlineAddToPhotos />
+                  All Blogs
                 </Link>
                 <Link
                   to="settings"
