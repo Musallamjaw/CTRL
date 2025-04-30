@@ -24,6 +24,7 @@ import ForgotPasswordForm from "../components/organism/ForgotPasswordForm";
 import ResetPasswordForm from "../components/organism/ResetPasswordForm";
 import AddBlog from "../template/AddBlog";
 import BlogList from "../template/AllBlogs";
+import BlogView from "../pages/BlogView";
 
 const router = createBrowserRouter([
   {
@@ -43,6 +44,10 @@ const router = createBrowserRouter([
             element: (
               <ProtectdRoute path="/myTickets" element={<MyTickets />} />
             ),
+          },
+          {
+            path: "blog/:id",
+            element: <BlogView />,
           },
         ],
       },

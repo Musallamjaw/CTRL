@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 // Assuming your API file structure and export:
-import { getAllBlogs } from "../api/endpoints/blogs"; // Adjust path as needed
+import { getAllBlogs, publishBlog } from "../api/endpoints/blogs"; // Adjust path as needed
 import { Link } from "react-router-dom";
 import { toast } from "react-toastify"; // For showing errors nicely
 import BlogCard from "../components/molecule/BlogCard";
@@ -63,10 +63,31 @@ const BlogList = () => {
       setCurrentPage(newPage);
     }
   };
-  const handleFilterChange = (event) => {
-    setFilter(event.target.value);
-    setCurrentPage(1); // Reset to page 1 when filter changes
+
+  const handlePublishToggle = async (id, newStatus, event) => {
+    try {
+      const response = await publishBlog(id);
+
+      console.log("newStatus", newStatus);
+
+      if (!response.status) {
+        throw new Error("Failed to update publish status");
+      }
+
+      setBlogs((prevBlogs) =>
+        prevBlogs.map((b) =>
+          b._id === id ? { ...b, published: newStatus } : b
+        )
+      );
+    } catch (error) {
+      console.error("Failed to update publish status:", error);
+      toast.error("Failed to update publish status");
+
+      // ❌ Revert UI checkbox if API fails
+      if (event) event.target.checked = !newStatus;
+    }
   };
+
   const handleBlogTypeChange = (event) => {
     const value = event.target.value;
     setSelectedBlogType(value); // Set null for 'all' option
@@ -78,7 +99,7 @@ const BlogList = () => {
         <h1 className="text-3xl font-bold text-gray-800">Blog Posts</h1>
         <Link
           to="/admin/addBlog" // Adjust link
-          className="px-4 py-2 bg-indigo-600 text-white font-medium rounded-md hover:bg-indigo-700 transition duration-150 ease-in-out"
+          className="px-4 py-2 bg-base-color text-white rounded-md hover:bg-green-700 font-medium transition duration-150 ease-in-out"
         >
           Add New Blog
         </Link>
@@ -103,6 +124,7 @@ const BlogList = () => {
             <option value="content">Content</option>
             <option value="file">File</option>
             <option value="images">Images</option>
+            <option value="link">Link</option>
           </select>
         </div>
       </div>
@@ -141,7 +163,11 @@ const BlogList = () => {
         <>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {blogs.map((blog) => (
-              <BlogCard key={blog._id} blog={blog} />
+              <BlogCard
+                key={blog._id}
+                blog={blog}
+                onPublishToggle={handlePublishToggle}
+              />
             ))}
           </div>
 

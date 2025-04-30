@@ -5,7 +5,7 @@ import { IoSettingsSharp } from "react-icons/io5";
 import Footer from "../components/organism/Footer";
 import SpeedDialComponent from "../components/organism/SpeedDialComponent";
 import { BiSolidDashboard } from "react-icons/bi";
-import { IoMdPersonAdd } from "react-icons/io";
+import { IoMdDocument, IoMdPersonAdd } from "react-icons/io";
 
 export default function Admin() {
   const location = useLocation();
@@ -75,7 +75,18 @@ export default function Admin() {
                   Add Event
                 </Link>
 
-                {/* <Link
+                <Link
+                  to="AllBlogs"
+                  className={`flex items-center gap-2 ${
+                    location.pathname === "/admin/allBlogs"
+                      ? "hover:text-gray-500 text-base-color"
+                      : "text-gray-500 hover:text-base-color"
+                  } `}
+                >
+                  <IoMdDocument />
+                  All Blogs
+                </Link>
+                <Link
                   to="addBlog"
                   className={`flex items-center gap-2 ${
                     location.pathname === "/admin/addBlogs"
@@ -86,17 +97,6 @@ export default function Admin() {
                   <MdOutlineAddToPhotos />
                   Add Blog
                 </Link>
-                <Link
-                  to="AllBlogs"
-                  className={`flex items-center gap-2 ${
-                    location.pathname === "/admin/allBlogs"
-                      ? "hover:text-gray-500 text-base-color"
-                      : "text-gray-500 hover:text-base-color"
-                  } `}
-                >
-                  <MdOutlineAddToPhotos />
-                  All Blogs
-                </Link> */}
                 <Link
                   to="settings"
                   className={`flex items-center gap-2 ${

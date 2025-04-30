@@ -35,7 +35,7 @@ const EventSchema = new mongoose.Schema(
       enum: ["in-person", "online"],
       default: "in-person",
     },
-    price: { type: Number, required: true },
+    price: { type: Number },
     capacity: { type: Number, required: true },
     availableTickets: { type: Number, required: true, default: 0 },
     coverImage: { type: String, required: true },

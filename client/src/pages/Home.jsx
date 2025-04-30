@@ -10,8 +10,10 @@ import { useSelector } from "react-redux";
 import PaginationRounded from "../components/molecule/PaginationRounded";
 import { getAllEvents, getCountEvents } from "../api/endpoints/events";
 import { useEffect, useState } from "react";
-import bg_image from "../assets/images/6a60863f-851e-4026-a8a5-218b429fe327.jpg";
 import { toast } from "react-toastify";
+import { getPublishedBlogs } from "../api/endpoints/blogs";
+import ClientBlogCard from "../components/molecule/ClientBlogCard";
+import UIBlogCard from "../components/molecule/UIBlogCard";
 AOS.init();
 
 export default function Home() {
@@ -23,6 +25,7 @@ export default function Home() {
   const [currentPage, setCurrentPage] = useState(1);
   const [pageCount, setPageCount] = useState(1);
   const itemsPerPage = 3;
+  const [blogs, setBlogs] = useState([]);
 
   useEffect(() => {
     const fetchEventsCount = async () => {
@@ -35,6 +38,18 @@ export default function Home() {
       }
     };
 
+    const fetchBlogs = async () => {
+      try {
+        const blogsRes = await getPublishedBlogs();
+
+        console.log("first", blogsRes);
+        setBlogs(blogsRes?.data?.data || []);
+      } catch (error) {
+        alert.error("Error fetching blogs:", error);
+      }
+    };
+
+    fetchBlogs();
     fetchEventsCount();
   }, [filter, eventsCount]);
 
@@ -119,6 +134,19 @@ export default function Home() {
       </section>
 
       <AboutUs />
+
+      <div className="max-w-[1300px] mx-auto px-4 py-10">
+        <h2 className="text-2xl md:text-4xl font-bold text-center text-gray-800 mb-8">
+          Latest Blogs
+        </h2>
+        {/* Container for the feed */}
+        <div className="max-w-5xl mx-auto px-4 space-y-8 md:space-y-12">
+          {/* Map over blogs and render each card */}
+          {blogs.map((blog) => (
+            <ClientBlogCard key={blog._id} blog={blog} />
+          ))}
+        </div>
+      </div>
 
       <section
         id="events"

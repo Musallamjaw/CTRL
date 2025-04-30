@@ -1,22 +1,19 @@
+const fs = require("fs");
 const multer = require("multer"); // Import multer to check for MulterError instances
 const path = require("path");
 const Blog = require("../models/blogs.model");
 const { uploadBlogMedia } = require("../middleware/blogUploads");
 
 exports.createBlog = async (req, res) => {
-  // 1. Call the Multer middleware
   uploadBlogMedia(req, res, async (err) => {
-    // 2. Handle Multer-specific errors first
     if (err) {
       console.error("Multer Error:", err);
       if (err instanceof multer.MulterError) {
-        // Handle specific Multer errors (e.g., file size limits)
         return res.status(400).json({
           success: false,
           message: `File upload error: ${err.message}. Please check file size and type limits.`,
         });
       } else {
-        // Handle custom errors from fileFilter or other issues
         return res.status(400).json({
           success: false,
           message: err.message || "File upload failed.",
@@ -24,18 +21,32 @@ exports.createBlog = async (req, res) => {
       }
     }
 
-    // 3. Proceed with logic if Multer succeeded (or wasn't needed for 'content' type)
     try {
-      const { title, description, blogType, content } = req.body;
+      const { title, description, blogType, content, imageSize, link } =
+        req.body;
 
-      // 4. Validate required text fields and blogType
+      let selectedImageSize = null;
+      if (blogType === "images") {
+        const validImageSizes = ["square", "sixByNine"];
+        if (!imageSize || !validImageSizes.includes(imageSize)) {
+          return res.status(400).json({
+            success: false,
+            message: `Invalid or missing imageSize. Must be one of: ${validImageSizes.join(
+              ", "
+            )}`,
+          });
+        }
+        selectedImageSize = imageSize;
+      }
+
       if (!title || !description) {
         return res.status(400).json({
           success: false,
           message: "Title and description are required.",
         });
       }
-      const validBlogTypes = ["file", "images", "content"];
+
+      const validBlogTypes = ["file", "images", "content", "link"];
       if (!blogType || !validBlogTypes.includes(blogType)) {
         return res.status(400).json({
           success: false,
@@ -45,16 +56,14 @@ exports.createBlog = async (req, res) => {
         });
       }
 
-      // 5. Prepare variables for blog data
       let fileUrl = null;
       let imageUrls = [];
-      let finalContent = content || null; // Use provided content or default to null
+      let finalContent = content || null;
+      let finalLink = null;
 
-      // 6. Type-specific validation and data extraction from req.files
       switch (blogType) {
         case "file":
-          // req.files.file will be an array (max 1 element due to config) or undefined
-          const uploadedFile = req.files?.file?.[0]; // Safely access the first file
+          const uploadedFile = req.files?.file?.[0];
           if (!uploadedFile) {
             return res.status(400).json({
               success: false,
@@ -62,12 +71,11 @@ exports.createBlog = async (req, res) => {
             });
           }
           fileUrl = `/uploads/blogFiles/${uploadedFile.filename}`;
-          finalContent = null; // Ensure content is null for file blogs
-          imageUrls = []; // Ensure images are empty
+          finalContent = null;
+          imageUrls = [];
           break;
 
         case "images":
-          // req.files.images will be an array (max 10 elements) or undefined
           const uploadedImages = req.files?.images;
           if (!uploadedImages || uploadedImages.length === 0) {
             return res.status(400).json({
@@ -76,12 +84,11 @@ exports.createBlog = async (req, res) => {
                 "At least one image upload is required for 'images' blog type.",
             });
           }
-          // Max 10 images is already enforced by multer config in uploadBlogMedia
           imageUrls = uploadedImages.map(
             (file) => `/uploads/blogImages/${file.filename}`
           );
-          finalContent = null; // Ensure content is null for image blogs
-          fileUrl = null; // Ensure file is null
+          finalContent = null;
+          fileUrl = null;
           break;
 
         case "content":
@@ -91,66 +98,65 @@ exports.createBlog = async (req, res) => {
               message: "Content is required for 'content' blog type.",
             });
           }
-          // No file uploads expected for 'content' type
-          if (req.files?.file?.length > 0 || req.files?.images?.length > 0) {
-            console.warn(
-              `Files uploaded for 'content' blog type for title "${title}". These files will be ignored.`
-            );
-            // Optional: Add logic here to delete ignored uploaded files if necessary
-          }
-          fileUrl = null; // Ensure file is null for content blogs
-          imageUrls = []; // Ensure images are empty
+          fileUrl = null;
+          imageUrls = [];
           break;
-        // No default needed as blogType is validated above
+
+        case "link":
+          if (!link) {
+            return res.status(400).json({
+              success: false,
+              message: "A valid URL is required for 'link' blog type.",
+            });
+          }
+          finalLink = link.trim();
+          finalContent = null;
+          fileUrl = null;
+          imageUrls = [];
+          break;
       }
 
-      // 7. Create new Blog document
       const newBlog = new Blog({
         title,
         description,
         content: finalContent,
         blogType,
-        // Schema expects 'files' as an array, even for single file
         files: fileUrl ? [fileUrl] : [],
         images: imageUrls,
-        published: false, // Default to not published
-        // blogType: blogType // Optionally store the type itself
+        imageSize: selectedImageSize,
+        link: finalLink,
+        published: false,
       });
 
-      // 8. Save to database
       const savedBlog = await newBlog.save();
 
-      // 9. Return success response
       return res.status(201).json({
         success: true,
         message: "Blog created successfully",
-        blog: savedBlog, // Return the created blog document
+        blog: savedBlog,
       });
     } catch (error) {
-      // 10. Handle potential errors during validation or saving
       console.error("Error creating blog:", error);
-      // Handle Mongoose validation errors specifically
       if (error.name === "ValidationError") {
         return res.status(400).json({
           success: false,
           message: `Validation Failed: ${error.message}`,
         });
       }
-      // Generic server error
       return res.status(500).json({
         success: false,
         message: "Failed to create blog due to an internal error.",
-        error: error.message, // Provide error message in response (consider security implications)
+        error: error.message,
       });
     }
-  }); // End of uploadBlogMedia callback
+  });
 };
 
 // Get all Blogs with pagination and filtering
 exports.getAllBlogs = async (req, res) => {
   try {
     const page = parseInt(req.params.page) || 1;
-    const limit = parseInt(req.params.limit) || 4;
+    const limit = parseInt(req.params.limit) || 10;
     const skip = (page - 1) * limit;
     const filter = req.params.filter || "all";
 
@@ -180,6 +186,333 @@ exports.getAllBlogs = async (req, res) => {
     return res.status(500).json({
       success: false,
       message: "Failed to fetch Blogs",
+      error: error.message,
+    });
+  }
+};
+
+exports.publishBlog = async (req, res) => {
+  try {
+    const blogId = req.params.id;
+    const blog = await Blog.findById(blogId);
+    if (!blog) {
+      return res.status(404).json({
+        success: false,
+        message: "Blog not found",
+      });
+    }
+
+    const isPublished = blog.published;
+    blog.published = !isPublished;
+    await blog.save();
+
+    return res.status(200).json({
+      success: true,
+      message: isPublished
+        ? "Blog unpublished successfully"
+        : "Blog published successfully",
+    });
+  } catch (error) {
+    console.error("Error publishing Blog:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Failed to publish Blog",
+      error: error.message,
+    });
+  }
+};
+
+exports.publishedBlogs = async (req, res) => {
+  try {
+    const limit = req.query.limit || 10;
+    const page = req.query.page || 1;
+    const skip = (page - 1) * limit;
+    const blogs = await Blog.find({ published: true })
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit);
+    const totalBlogs = await Blog.countDocuments({ published: true });
+    const totalPages = Math.ceil(totalBlogs / limit);
+    return res.status(200).json({
+      success: true,
+      data: blogs,
+      pagination: {
+        total: totalBlogs,
+        limit,
+        page,
+        totalPages,
+      },
+    });
+  } catch (error) {
+    console.error("Error fetching published Blogs:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Failed to fetch published Blogs",
+      error: error.message,
+    });
+  }
+};
+
+exports.getBlogById = async (req, res) => {
+  try {
+    const blogId = req.params.id;
+    const blog = await Blog.findById(blogId);
+    if (!blog) {
+      return res.status(404).json({
+        success: false,
+        message: "Blog not found",
+      });
+    }
+    return res.status(200).json({
+      success: true,
+      data: blog,
+    });
+  } catch (error) {
+    console.error("Error fetching Blog by ID:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Failed to fetch Blog by ID",
+      error: error.message,
+    });
+  }
+};
+
+exports.updateBlog = async (req, res) => {
+  const blogId = req.params.id;
+
+  uploadBlogMedia(req, res, async (err) => {
+    if (err) {
+      console.error("Multer Error:", err);
+      if (err instanceof multer.MulterError) {
+        return res.status(400).json({
+          success: false,
+          message: `File upload error: ${err.message}`,
+        });
+      }
+      return res.status(400).json({
+        success: false,
+        message: err.message || "File upload failed.",
+      });
+    }
+
+    try {
+      const {
+        title,
+        description,
+        blogType,
+        content,
+        imageSize,
+        existingImages,
+        link,
+      } = req.body;
+
+      const blog = await Blog.findById(blogId);
+      if (!blog) {
+        return res.status(404).json({
+          success: false,
+          message: "Blog not found.",
+        });
+      }
+
+      const validBlogTypes = ["file", "images", "content", "link"];
+      if (!blogType || !validBlogTypes.includes(blogType)) {
+        return res.status(400).json({
+          success: false,
+          message: `Invalid blogType. Must be one of: ${validBlogTypes.join(
+            ", "
+          )}`,
+        });
+      }
+
+      let selectedImageSize = null;
+      if (blogType === "images") {
+        const validImageSizes = ["square", "sixByNine"];
+        if (!imageSize || !validImageSizes.includes(imageSize)) {
+          return res.status(400).json({
+            success: false,
+            message: `Invalid or missing imageSize. Must be one of: ${validImageSizes.join(
+              ", "
+            )}`,
+          });
+        }
+        selectedImageSize = imageSize;
+      }
+
+      let fileUrl = null;
+      let imageUrls = [];
+      let finalContent = content || null;
+      let finalLink = null;
+
+      switch (blogType) {
+        case "file":
+          const uploadedFile = req.files?.file?.[0];
+          if (!uploadedFile && !blog.files.length) {
+            return res.status(400).json({
+              success: false,
+              message: "A file is required for 'file' blog type.",
+            });
+          }
+          fileUrl = uploadedFile
+            ? `/uploads/blogFiles/${uploadedFile.filename}`
+            : blog.files[0];
+          finalContent = null;
+          imageUrls = [];
+          break;
+
+        case "images":
+          const uploadedImages = req.files?.images || [];
+          const retainedImages = Array.isArray(existingImages)
+            ? existingImages
+            : existingImages
+            ? [existingImages]
+            : [];
+
+          const newImageUrls = uploadedImages.map(
+            (img) => `/uploads/blogImages/${img.filename}`
+          );
+          imageUrls = [...retainedImages, ...newImageUrls];
+
+          if (imageUrls.length === 0) {
+            return res.status(400).json({
+              success: false,
+              message: "At least one image is required for 'images' blog type.",
+            });
+          }
+
+          const removedImages = blog.images.filter(
+            (img) => !retainedImages.includes(img)
+          );
+          for (const imgPath of removedImages) {
+            const absolutePath = path.join(__dirname, "..", imgPath);
+            fs.unlink(absolutePath, (err) => {
+              if (err) {
+                console.error(`Failed to delete ${imgPath}:`, err.message);
+              } else {
+                console.log(`Deleted old image: ${imgPath}`);
+              }
+            });
+          }
+
+          finalContent = null;
+          fileUrl = null;
+          break;
+
+        case "content":
+          if (!finalContent || finalContent.trim() === "") {
+            return res.status(400).json({
+              success: false,
+              message: "Content is required for 'content' blog type.",
+            });
+          }
+          fileUrl = null;
+          imageUrls = [];
+          break;
+
+        case "link":
+          if (!link) {
+            return res.status(400).json({
+              success: false,
+              message: "A valid URL is required for 'link' blog type.",
+            });
+          }
+          finalLink = link.trim();
+          finalContent = null;
+          fileUrl = null;
+          imageUrls = [];
+          break;
+      }
+
+      blog.title = title || blog.title;
+      blog.description = description || blog.description;
+      blog.blogType = blogType;
+      blog.files = fileUrl ? [fileUrl] : [];
+      blog.images = imageUrls;
+      blog.content = finalContent;
+      blog.link = finalLink;
+      blog.imageSize = selectedImageSize;
+      blog.updatedAt = Date.now();
+
+      const updatedBlog = await blog.save();
+
+      return res.status(200).json({
+        success: true,
+        message: "Blog updated successfully.",
+        blog: updatedBlog,
+      });
+    } catch (error) {
+      console.error("Error updating blog:", error);
+      return res.status(500).json({
+        success: false,
+        message: "Failed to update blog due to an internal error.",
+        error: error.message,
+      });
+    }
+  });
+};
+
+exports.deleteBlog = async (req, res) => {
+  try {
+    const { blogId } = req.params;
+
+    // 1. Validate blogId presence
+    if (!blogId) {
+      return res.status(400).json({
+        success: false,
+        message: "Missing blog ID in request.",
+      });
+    }
+
+    // 2. Fetch the blog document
+    const blog = await Blog.findById(blogId);
+    if (!blog) {
+      return res.status(404).json({
+        success: false,
+        message: "Blog not found.",
+      });
+    }
+
+    // 3. Delete associated files from disk (if any)
+    // Delete file uploads
+    if (blog.files && blog.files.length > 0) {
+      blog.files.forEach((filePath) => {
+        const absolutePath = path.join(__dirname, "..", filePath);
+        fs.unlink(absolutePath, (err) => {
+          if (err) {
+            console.warn(`Failed to delete file: ${filePath}`, err.message);
+          } else {
+            console.log(`Deleted file: ${filePath}`);
+          }
+        });
+      });
+    }
+
+    // Delete image uploads
+    if (blog.images && blog.images.length > 0) {
+      blog.images.forEach((imgPath) => {
+        const absolutePath = path.join(__dirname, "..", imgPath);
+        fs.unlink(absolutePath, (err) => {
+          if (err) {
+            console.warn(`Failed to delete image: ${imgPath}`, err.message);
+          } else {
+            console.log(`Deleted image: ${imgPath}`);
+          }
+        });
+      });
+    }
+
+    // 4. Delete the blog from DB
+    await blog.deleteOne();
+
+    // 5. Respond with success
+    return res.status(200).json({
+      success: true,
+      message: "Blog deleted successfully.",
+    });
+  } catch (error) {
+    console.error("Error deleting blog:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Failed to delete blog due to an internal error.",
       error: error.message,
     });
   }

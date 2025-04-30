@@ -23,13 +23,32 @@ const AddBlog = () => {
       description: "",
       content: "",
       file: null,
+      link: "",
       images: [],
       blogType: "content", // Match initial state
+      imageSize: "square", // default
     },
     validationSchema: Yup.object().shape({
       blogType: Yup.string().required("Blog type is required"),
       title: Yup.string().required("Blog title is required"),
       description: Yup.string().required("Blog description is required"),
+      imageSize: Yup.string().when("blogType", {
+        is: "images",
+        then: (schema) =>
+          schema
+            .oneOf(["square", "sixByNine"], "Select a valid image size")
+            .required("Image size is required for image blogs"),
+        otherwise: (schema) => schema.notRequired(),
+      }),
+      link: Yup.string().when("blogType", {
+        is: "link",
+        then: (schema) =>
+          schema
+            .required("A valid URL is required for Link Blog")
+            .url("Must be a valid URL"),
+        otherwise: (schema) => schema.notRequired(),
+      }),
+
       // Conditional validation based on blogType
       file: Yup.mixed().when("blogType", {
         is: "file",
@@ -59,6 +78,7 @@ const AddBlog = () => {
       formData.append("title", values.title);
       formData.append("description", values.description);
       formData.append("blogType", values.blogType); // Send type info if backend needs it
+      formData.append("imageSize", values.imageSize); // Add image size if blog type is images
 
       // Append type-specific fields
       switch (values.blogType) {
@@ -77,6 +97,10 @@ const AddBlog = () => {
         case "content":
           formData.append("content", values.content);
           break;
+        case "link":
+          formData.append("link", values.link);
+          break;
+
         default:
           toast.error("Invalid blog type selected");
           setIsSubmitting(false);
@@ -184,6 +208,10 @@ const AddBlog = () => {
     if (newType !== "content") {
       formik.setFieldValue("content", "");
     }
+    if (newType !== "link") {
+      formik.setFieldValue("link", "");
+    }
+
     // Reset touched status for fields being hidden to prevent lingering errors
     formik.setTouched(
       {
@@ -232,6 +260,7 @@ const AddBlog = () => {
             <option value="content">Content Blog</option>
             <option value="file">File Blog</option>
             <option value="images">Images Blog</option>
+            <option value="link">Link Blog</option>
           </select>
           {formik.touched.blogType && formik.errors.blogType && (
             <div className="text-red-500 text-sm mt-1">
@@ -239,7 +268,6 @@ const AddBlog = () => {
             </div>
           )}
         </div>
-
         {/* Title */}
         <div>
           <label
@@ -268,7 +296,6 @@ const AddBlog = () => {
             </div>
           )}
         </div>
-
         {/* Description */}
         <div>
           <label
@@ -297,9 +324,7 @@ const AddBlog = () => {
             </div>
           )}
         </div>
-
         {/* --- Conditional Fields --- */}
-
         {/* File Blog Fields */}
         {blogType === "file" && (
           <div className="border-t pt-4 mt-4">
@@ -343,10 +368,39 @@ const AddBlog = () => {
             )}
           </div>
         )}
-
         {/* Images Blog Fields */}
         {blogType === "images" && (
           <div className="border-t pt-4 mt-4">
+            {/* Image Size Dropdown */}
+            <div className="mb-4">
+              <label
+                htmlFor="imageSize"
+                className="block text-gray-700 mb-2 font-medium"
+              >
+                Image Size
+              </label>
+              <select
+                id="imageSize"
+                name="imageSize"
+                value={formik.values.imageSize}
+                onChange={formik.handleChange}
+                onBlur={formik.handleBlur}
+                className={`block w-full px-4 py-2 border ${
+                  formik.touched.imageSize && formik.errors.imageSize
+                    ? "border-red-500"
+                    : "border-gray-300"
+                } rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition duration-150 ease-in-out`}
+              >
+                <option value="square">Square (1:1)</option>
+                <option value="sixByNine">Portrait (16:9)</option>
+              </select>
+              {formik.touched.imageSize && formik.errors.imageSize && (
+                <div className="text-red-500 text-sm mt-1">
+                  {formik.errors.imageSize}
+                </div>
+              )}
+            </div>
+
             <h3 className="text-lg font-medium text-gray-700 mb-3">
               Upload Images (Max {MAX_IMAGES})
             </h3>
@@ -379,18 +433,42 @@ const AddBlog = () => {
             </div>
 
             {/* Image Previews */}
-            {imagePreviews.length > 0 && (
-              <div className="mt-4 grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-4 border p-4 rounded-md bg-gray-50">
-                {imagePreviews.map((previewUrl, index) => (
+            <div className="mt-4 grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-4 border p-4 rounded-md bg-gray-50">
+              {imagePreviews.map((previewUrl, index) => (
+                <div
+                  key={index}
+                  className={`relative w-full overflow-hidden border border-gray-300 rounded-md ${
+                    formik.values.imageSize === "square"
+                      ? "aspect-square"
+                      : "aspect-[2/3]" // 6:9 is the same as 2:3
+                  } bg-gray-200`}
+                >
                   <img
-                    key={index}
                     src={previewUrl}
                     alt={`Preview ${index + 1}`}
-                    className="w-full h-24 object-cover rounded-md border border-gray-300"
+                    className="w-full h-full object-cover"
                   />
-                ))}
-              </div>
-            )}
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const updatedImages = formik.values.images.filter(
+                        (_, i) => i !== index
+                      );
+                      formik.setFieldValue("images", updatedImages);
+
+                      const updatedPreviews = imagePreviews.filter(
+                        (_, i) => i !== index
+                      );
+                      setImagePreviews(updatedPreviews);
+                    }}
+                    className="absolute top-1 right-1 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center hover:bg-red-600 transition"
+                    title="Remove Image"
+                  >
+                    &times;
+                  </button>
+                </div>
+              ))}
+            </div>
 
             {formik.touched.images && formik.errors.images && (
               <div className="text-red-500 text-sm mt-1">
@@ -402,7 +480,6 @@ const AddBlog = () => {
           </div>
         )}
 
-        {/* Content Blog Fields */}
         {blogType === "content" && (
           <div className="border-t pt-4 mt-4">
             <h3 className="text-lg font-medium text-gray-700 mb-3">
@@ -436,11 +513,44 @@ const AddBlog = () => {
           </div>
         )}
 
+        {blogType === "link" && (
+          <div className="border-t pt-4 mt-4">
+            <h3 className="text-lg font-medium text-gray-700 mb-3">
+              Blog Link
+            </h3>
+            <label
+              htmlFor="link"
+              className="block text-gray-700 mb-2 font-medium"
+            >
+              External URL
+            </label>
+            <input
+              id="link"
+              name="link"
+              type="url"
+              placeholder="https://example.com/article"
+              value={formik.values.link}
+              onChange={formik.handleChange}
+              onBlur={formik.handleBlur}
+              className={`block w-full px-4 py-2 border ${
+                formik.touched.link && formik.errors.link
+                  ? "border-red-500"
+                  : "border-gray-300"
+              } rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition duration-150 ease-in-out`}
+            />
+            {formik.touched.link && formik.errors.link && (
+              <div className="text-red-500 text-sm mt-1">
+                {formik.errors.link}
+              </div>
+            )}
+          </div>
+        )}
+
         {/* Submit Button */}
         <button
           type="submit"
           disabled={isSubmitting || !formik.isValid} // Disable if submitting or form is invalid
-          className={`w-full px-4 py-3 mt-4 bg-indigo-600 text-white font-medium rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition duration-150 ease-in-out ${
+          className={`w-full px-4 py-3 mt-4 bg-base-color text-white rounded-md hover:bg-green-700 font-medium focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition duration-150 ease-in-out ${
             isSubmitting || !formik.isValid
               ? "opacity-50 cursor-not-allowed"
               : ""

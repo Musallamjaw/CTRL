@@ -3,13 +3,7 @@ const { uploadUserCoverImage } = require("../middleware/multerConfig");
 
 // Helper function to validate event data
 const validateEventData = (eventType, data) => {
-  if (
-    !data.title ||
-    !data.description ||
-    !data.date ||
-    !data.price ||
-    !data.capacity
-  ) {
+  if (!data.title || !data.description || !data.date || !data.capacity) {
     return { valid: false, message: "All required fields must be filled" };
   }
 
