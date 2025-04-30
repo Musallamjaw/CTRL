@@ -60,10 +60,7 @@ exports.getAllUsers = async (req, res) => {
     const limit = 6;
     const skip = (page - 1) * limit;
 
-    const users = await User.find()
-      .limit(limit)
-      .skip(skip)
-      .sort({ createdAt: -1 });
+    const users = await User.find().limit(limit).skip(skip);
 
     res.status(200).json(users);
   } catch (error) {

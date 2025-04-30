@@ -135,12 +135,12 @@ export default function Home() {
 
       <AboutUs />
       <div className="bg-gray-100">
-        <div className="max-w-[1300px] mx-auto px-4 py-10">
+        <div className="py-24 px-6 lg:px-20 mx-auto">
           <h2 className="text-2xl md:text-4xl font-bold text-center text-gray-800 mb-8">
             Latest Blogs
           </h2>
           {/* Container for the feed */}
-          <div className="max-w-5xl mx-auto px-4 space-y-8 md:space-y-12">
+          <div className="max-w-7xl mx-auto px-4 space-y-8 md:space-y-12">
             {/* Map over blogs and render each card */}
             {blogs.map((blog) => (
               <ClientBlogCard key={blog._id} blog={blog} />
