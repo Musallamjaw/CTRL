@@ -25,6 +25,7 @@ import ResetPasswordForm from "../components/organism/ResetPasswordForm";
 import AddBlog from "../template/AddBlog";
 import BlogList from "../template/AllBlogs";
 import BlogView from "../pages/BlogView";
+import Member from "../pages/Member";
 
 const router = createBrowserRouter([
   {
@@ -80,6 +81,21 @@ const router = createBrowserRouter([
             element: <AddUser />,
           },
           {
+            path: "addBlog",
+            element: <AddBlog />,
+          },
+          {
+            path: "allBlogs",
+            element: <BlogList />,
+          },
+        ],
+      },
+      {
+        path: "/member",
+        element: <ProtectdRoute path="/member" element={<Member />} />,
+        children: [
+          {
+            index: true,
             path: "addBlog",
             element: <AddBlog />,
           },

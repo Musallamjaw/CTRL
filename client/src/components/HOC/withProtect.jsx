@@ -15,6 +15,16 @@ export default function ProtectdRoute({ element, path }) {
       if (userRole === "scanner" && path !== "/" && path !== "/qrScanner") {
         toast.error("You do not have permission to access this link.");
         navigate("/");
+      }
+      // Admin restriction (if you want to restrict member from other admin routes)
+      else if (
+        userRole === "member" &&
+        path !== "/member" &&
+        path !== "/member/addBlog" &&
+        path !== "/member/allBlogs"
+      ) {
+        toast.error("Members are only allowed to access blog-related pages.");
+        navigate("/");
       } else if (
         userRole !== "admin" &&
         (path === "/admin" ||
