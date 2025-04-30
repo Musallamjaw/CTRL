@@ -29,7 +29,7 @@ const EditEvent = ({ initialValues = {} }) => {
     initialValues: {
       coverImage: eventData.coverImage || null,
       title: eventData.title || "",
-      price: eventData.price || "",
+      price: eventData.price || 0,
       date: eventData.date
         ? new Date(eventData.date).toISOString().substring(0, 16)
         : "", // Format date correctly

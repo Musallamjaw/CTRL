@@ -94,7 +94,7 @@ export default function Dashboard() {
         <h2 className="text-2xl font-semibold text-blue-900 mb-4">Users</h2>
         <div className="relative overflow-x-auto shadow-md sm:rounded-lg">
           <table className="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
-            <thead className="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
+            <thead className="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400 sticky top-0 z-10">
               <tr>
                 <th scope="col" className="px-6 py-3">
                   Name
@@ -119,47 +119,48 @@ export default function Dashboard() {
                 </th>
               </tr>
             </thead>
-            <tbody>
-              {usersData.length > 0 ? (
-                usersData.map((user) => (
-                  <tr key={user._id} className="bg-white border-b">
+          </table>
+          <div className="max-h-300 overflow-y-auto">
+            <table className="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
+              <tbody>
+                {usersData.length > 0 ? (
+                  usersData.map((user) => (
+                    <tr key={user._id} className="bg-white border-b">
+                      <td className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap">
+                        {user.name}
+                      </td>
+                      <td className="px-6 py-4">{user.email}</td>
+                      <td className="px-6 py-4">{user.phoneNumber}</td>
+                      <td className="px-6 py-4">{user.role}</td>
+                      <td className="px-6 py-4">{user.major}</td>
+                      <td className="px-6 py-4">{user.college}</td>
+                      <td className="px-6 py-4">
+                        <button
+                          type="button"
+                          onClick={() => handleDelete(user._id)}
+                          className="font-medium text-red-600 dark:text-red-500 hover:underline"
+                        >
+                          Delete User
+                        </button>
+                      </td>
+                    </tr>
+                  ))
+                ) : (
+                  <tr>
                     <td
-                      scope="row"
-                      className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap"
+                      colSpan="7"
+                      className="px-6 py-4 text-center text-gray-500"
                     >
-                      {user.name}
-                    </td>
-                    <td className="px-6 py-4">{user.email}</td>
-                    <td className="px-6 py-4">{user.phoneNumber}</td>
-                    <td className="px-6 py-4">{user.role}</td>
-                    <td className="px-6 py-4">{user.major}</td>
-                    <td className="px-6 py-4">{user.college}</td>
-                    <td className="px-6 py-4">
-                      <button
-                        type="button"
-                        onClick={() => handleDelete(user._id)}
-                        className="font-medium text-red-600 dark:text-red-500 hover:underline"
-                      >
-                        Delete User
-                      </button>
+                      No users found.
                     </td>
                   </tr>
-                ))
-              ) : (
-                <tr>
-                  <td
-                    colSpan="4"
-                    className="px-6 py-4 text-center text-gray-500"
-                  >
-                    No users found.
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
+                )}
+              </tbody>
+            </table>
+          </div>
         </div>
         {usersData.length > 0 && (
-          <div className="mx-auto">
+          <div className="mx-auto mt-4">
             <PaginationRounded
               count={pageCount}
               page={currentPage}
