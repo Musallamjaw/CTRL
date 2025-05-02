@@ -4,20 +4,30 @@ import {
   FileText,
   Image as ImageIcon,
   File,
-  // Clock,
   Calendar,
   ChevronDown,
   ChevronUp,
-  // ChevronLeft,
-  // ChevronRight,
   Download,
   ExternalLink,
+  ChevronLeft,
+  ChevronRight,
 } from "lucide-react";
 
 const ClientBlogCard = ({ blog }) => {
   const [showFullContent, setShowFullContent] = useState(false);
   const [activeIndex, setActiveIndex] = useState(0);
-  const [hovered, setHovered] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
+  const [isTablet, setIsTablet] = useState(false);
+
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth < 768);
+      setIsTablet(window.innerWidth < 1024 && window.innerWidth >= 768);
+    };
+    handleResize();
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
 
   const formattedDate = new Date(blog.createdAt).toLocaleDateString("en-US", {
     year: "numeric",
@@ -49,37 +59,12 @@ const ClientBlogCard = ({ blog }) => {
         };
     }
   };
-  const [isPaused, setIsPaused] = useState(false);
-
-  const visibleCount = 3;
-
-  useEffect(() => {
-    const maxIndex = blog.images.length - visibleCount;
-
-    const interval = setInterval(() => {
-      setActiveIndex((prevIndex) =>
-        prevIndex >= maxIndex ? 0 : prevIndex + 1
-      );
-    }, 3000);
-
-    return () => clearInterval(interval);
-  }, [blog.images.length]);
-
-  const { icon, badgeColor } = getTypeDetails();
 
   const formatFileSize = (bytes) => {
     if (!bytes) return "Unknown size";
     const kb = bytes / 1024;
     if (kb < 1024) return `${kb.toFixed(2)} KB`;
     return `${(kb / 1024).toFixed(2)} MB`;
-  };
-
-  const handleNext = () => {
-    setActiveIndex((prev) => (prev + 1) % blog.images.length);
-  };
-
-  const handlePrevious = () => {
-    setActiveIndex((prev) => (prev === 0 ? blog.images.length - 1 : prev - 1));
   };
 
   const renderContentBlog = () => {
@@ -124,7 +109,7 @@ const ClientBlogCard = ({ blog }) => {
       return (
         <div
           key={index}
-          className="bg-gray-50 border border-gray-200 rounded-lg p-2 my-6 flex flex-col items-center w-full"
+          className="bg-gray-50 border border-gray-200 rounded-lg p-4 my-6 flex flex-col items-center w-full"
         >
           <File className="h-12 w-12 text-blue-600" />
           <h3 className="text-lg font-medium mt-4 mb-2">{fileName}</h3>
@@ -142,68 +127,116 @@ const ClientBlogCard = ({ blog }) => {
     });
   };
 
+  const [previewImage, setPreviewImage] = useState(null);
+
+  // Image preview modal
+  const renderImagePreviewModal = () => {
+    if (!previewImage) return null;
+
+    return (
+      <div
+        className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50"
+        onClick={() => setPreviewImage(null)}
+      >
+        <div
+          className="relative max-w-full max-h-full p-4"
+          onClick={(e) => e.stopPropagation()}
+        >
+          <button
+            onClick={() => setPreviewImage(null)}
+            className="absolute top-2 right-2 text-white bg-gray-800 p-1 rounded-full hover:bg-red-600"
+          >
+            ✕
+          </button>
+          <img
+            src={`https://api.ctrl-club.com${previewImage}`}
+            alt="Preview"
+            className="max-h-[70vh] max-w-[80vw] object-contain rounded-lg"
+          />
+        </div>
+      </div>
+    );
+  };
+
   const renderImagesBlog = () => {
     if (!blog.images || blog.images.length === 0) return null;
 
     const isSquare = blog?.imageSize === "square";
-    const imageWidth = isSquare ? 300 : 470; // Increase image width for 16:9 images
-    const imageHeight = isSquare ? 300 : (imageWidth * 9) / 16; // Maintain 16:9 aspect ratio for height
+
+    const getImagesPerView = () => {
+      if (isMobile) return 1;
+      if (isTablet) return isSquare ? 2 : 1;
+      return isSquare ? 3 : 2;
+    };
+
+    const imagesPerView = getImagesPerView();
+    const totalSlides = Math.ceil(blog.images.length / imagesPerView);
+    const startIndex = activeIndex * imagesPerView;
+    const visibleImages = blog.images.slice(
+      startIndex,
+      startIndex + imagesPerView
+    );
+
+    const handleNext = () => {
+      setActiveIndex((prev) => (prev + 1) % totalSlides);
+    };
+
+    const handlePrevious = () => {
+      setActiveIndex((prev) => (prev === 0 ? totalSlides - 1 : prev - 1));
+    };
+
+    useEffect(() => {
+      const interval = setInterval(() => {
+        handleNext();
+      }, 4000);
+      return () => clearInterval(interval);
+    }, [imagesPerView, totalSlides]);
 
     return (
-      <div className="w-full overflow-hidden my-8 relative">
-        <div
-          className="flex transition-transform duration-700 ease-in-out"
-          style={{
-            width: `${blog.images.length * imageWidth}px`, // Adjust width of carousel based on images
-            transform: `translateX(-${activeIndex * imageWidth}px)`, // Adjust translation for proper scrolling
-          }}
-        >
-          {blog.images.map((image, index) => (
-            <div
-              key={index}
-              className="flex-none px-2"
-              style={{
-                width: `${imageWidth}px`,
-                height: `${imageHeight}px`,
-              }}
-            >
-              <img
-                src={`https://api.ctrl-club.com${image}`}
-                alt={`Slide ${index}`}
-                className={`w-full h-full object-cover rounded-lg bg-gray-100 ${
-                  isSquare ? "aspect-square" : ""
-                }`}
-              />
-            </div>
-          ))}
-        </div>
-        {/* <div className="absolute inset-y-0 left-0 flex items-center">
+      <>
+        <div className="relative w-full my-8 group">
+          <div className="flex overflow-hidden w-full">
+            {visibleImages.map((image, index) => (
+              <div
+                key={index}
+                onClick={() => setPreviewImage(image)}
+                className="flex-1 px-2 cursor-pointer"
+                style={{ flexBasis: `${100 / imagesPerView}%` }}
+              >
+                <img
+                  src={`https://api.ctrl-club.com${image}`}
+                  alt={`Slide ${index}`}
+                  className="w-full h-[320px] sm:h-[360px] md:h-[420px] object-cover rounded-md"
+                />
+              </div>
+            ))}
+          </div>
+
           <button
             onClick={handlePrevious}
-            className="bg-gray-800 text-white p-2 rounded-full hover:bg-gray-700"
+            className="absolute top-1/2 left-2 -translate-y-1/2 bg-gray-800 text-white p-2 rounded-full opacity-70 hover:opacity-100"
           >
-            <ChevronLeft className="h-5 w-5" />
+            <ChevronLeft />
           </button>
-        </div>
-        <div className="absolute inset-y-0 right-0 flex items-center">
           <button
             onClick={handleNext}
-            className="bg-gray-800 text-white p-2 rounded-full hover:bg-gray-700"
+            className="absolute top-1/2 right-2 -translate-y-1/2 bg-gray-800 text-white p-2 rounded-full opacity-70 hover:opacity-100"
           >
-            <ChevronRight className="h-5 w-5" />
+            <ChevronRight />
           </button>
-        </div> */}
-      </div>
+        </div>
+        {renderImagePreviewModal()}
+      </>
     );
   };
 
   const renderLinkBlog = () => {
     if (!blog.link) return null;
 
-    const linkText = blog.link.split("/").pop(); // You can customize how you want to show the link's text
+    const linkText = blog.link.split("/").pop();
 
     return (
-      <div className="bg-gray-50 border border-gray-200 rounded-lg p-2 my-6 flex flex-col items-center w-full">
+      <div className="bg-gray-50 border border-gray-200 rounded-lg p-4 my-6 flex flex-col items-center w-full">
         <h3 className="text-lg font-medium mt-4 mb-2">{linkText}</h3>
         <p className="text-sm text-gray-500 mb-6">External Link</p>
         <a
@@ -212,8 +245,7 @@ const ClientBlogCard = ({ blog }) => {
           rel="noopener noreferrer"
           className="inline-flex items-center bg-base-color text-white px-4 py-2 rounded hover:bg-green-700 transition-colors"
         >
-          <ExternalLink className="mr-2 h-4 w-4" />{" "}
-          {/* Use an icon for external link */}
+          <ExternalLink className="mr-2 h-4 w-4" />
           Open Link
         </a>
       </div>
@@ -234,6 +266,8 @@ const ClientBlogCard = ({ blog }) => {
         return null;
     }
   };
+
+  const { icon, badgeColor } = getTypeDetails();
 
   return (
     <div className="bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow overflow-hidden border border-gray-200 w-full">
@@ -265,7 +299,7 @@ ClientBlogCard.propTypes = {
     _id: PropTypes.string.isRequired,
     title: PropTypes.string.isRequired,
     description: PropTypes.string.isRequired,
-    blogType: PropTypes.oneOf(["content", "file", "images"]).isRequired,
+    blogType: PropTypes.oneOf(["content", "file", "images", "link"]).isRequired,
     createdAt: PropTypes.string.isRequired,
     content: PropTypes.string,
     files: PropTypes.arrayOf(PropTypes.string),
