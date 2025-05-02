@@ -21,7 +21,8 @@ export default function ProtectdRoute({ element, path }) {
         userRole === "member" &&
         path !== "/member" &&
         path !== "/member/addBlog" &&
-        path !== "/member/allBlogs"
+        path !== "/member/allBlogs" &&
+        path !== "/qrScanner"
       ) {
         toast.error("Members are only allowed to access blog-related pages.");
         navigate("/");
@@ -37,7 +38,10 @@ export default function ProtectdRoute({ element, path }) {
           path === "/admin/allEvents/editEvent" ||
           path === "/qrScanner")
       ) {
-        if (userRole === "scanner" && path === "/qrScanner") {
+        if (
+          userRole === "scanner" ||
+          (userRole === "member" && path === "/qrScanner")
+        ) {
           navigate("/qrScanner");
         } else {
           toast.error("You do not have permission to access this link.");
